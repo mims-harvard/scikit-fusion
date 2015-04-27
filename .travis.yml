@@ -2,7 +2,7 @@ language: python
 python:
   - "3.4"
   - "2.7"
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install:
-# command to run tests, e.g. python setup.py test
-script:  
+before script:
+  - wget https://github.com/pygraphviz/pygraphviz/archive/master.zip -O /tmp/pygraphviz.zip
+  - unzip /tmp/pygraphviz.zip
+  - cd pygraphviz-master && python setup.py install
