@@ -52,7 +52,7 @@ def setup_package():
                                  'Topic :: Scientific/Engineering :: Bio-Informatics',
                                  'Programming Language :: Python :: 2',
                                  'Programming Language :: Python :: 2.6',
-                                 ])
+                                 ],)
 
     if (len(sys.argv) >= 2
             and ('--help' in sys.argv[1:] or sys.argv[1]

@@ -24,7 +24,7 @@ class TestFusionGraph(unittest.TestCase):
                      Relation(R35, t3, t5), Relation(R51, t5, t1)]
         fusion_graph = FusionGraph()
         fusion_graph.add(relations)
-        fusion_graph.draw_graphviz('test_fusion_graph.pdf')
+        # fusion_graph.draw_graphviz('test_fusion_graph.pdf')
 
 
 if __name__ == "__main__":
