@@ -12,7 +12,7 @@ Dependencies
 scikit-fusion is tested to work under Python 2.7+.
 
 The required dependencies to build the software are Numpy >= 1.7, SciPy >= 0.12,
-PyGraphviz >= 1.3 and Joblib>=0.8.4.
+PyGraphviz >= 1.3 and Joblib >= 0.8.4.
 
 Install
 =======

@@ -1,6 +1,12 @@
 include *.rst
 recursive-include doc *
 recursive-include examples *
+
 recursive-include skfusion/datasets *.csv *.csv.gz *.rst *.jpg *.txt
+recursive-include skfusion/fusion *.py
+recursive-include skfusion/tests *.py *.pdf *.txt *.csv *csv.gz
+
+include requirements.txt
 include LICENSE.txt
+include COPYING.txt
 include README.rst
