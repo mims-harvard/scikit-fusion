@@ -6,6 +6,7 @@ scikit-fusion
 |Travis|_
 
 .. |Travis| image:: https://travis-ci.org/marinkaz/scikit-fusion.svg?branch=master
+.. _Travis: https://travis-ci.org/marinkaz/scikit-fusion
 
 scikit-fusion is a Python module for data fusion based on recent collective latent
 factor models.
