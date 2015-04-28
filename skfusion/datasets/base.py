@@ -37,20 +37,26 @@ def load_source(source_path, delimiter=',', filling_value='0'):
     col_names = np.array(next(data_file).decode('utf-8').strip().split(delimiter))
     data = np.genfromtxt(data_file, delimiter=delimiter, missing_values=[''],
                          filling_values=filling_value)
-    return Relation(data=data, row_names=row_names, col_names=col_names)
+    return data, row_names, col_names
 
 
 def load_dicty():
     """Construct fusion graph from molecular biology of Dictyostelium."""
-    ann = load_source(join('dicty', 'dicty.gene_annnotations.csv.gz'))
-    expr = load_source(join('dicty', 'dicty.gene_expression.csv.gz'))
-    ppi = load_source(join('dicty', 'dicty.ppi.csv.gz'))
+    gene = ObjectType('Gene', 50)
+    go_term = ObjectType('GO term', 15)
+    exprc = ObjectType('Experimental condition', 5)
+
+    data, rn, cn = load_source(join('dicty', 'dicty.gene_annnotations.csv.gz'))
+    ann = Relation(data=data, row_type=gene, col_type=go_term, row_names=rn, col_names=cn)
+
+    data, rn, cn = load_source(join('dicty', 'dicty.gene_expression.csv.gz'))
+    expr = Relation(data=data, row_type=gene, col_type=exprc, row_names=rn, col_names=cn)
     expr.data = np.log(np.maximum(expr.data, np.finfo(np.float).eps))
 
-    return FusionGraph(ann=ann, expr=expr, ppi=ppi,
-                        gene=ObjectType('Gene', 50),
-                        go_term=ObjectType('GO term', 15),
-                        exprc=ObjectType('Exp condition', 5))
+    data, rn, cn = load_source(join('dicty', 'dicty.ppi.csv.gz'))
+    ppi = Relation(data=data, row_type=gene, col_type=gene, row_names=rn, col_names=cn)
+
+    return FusionGraph([ann, expr, ppi])
 
 
 def load_pharma():

@@ -26,3 +26,6 @@ class Relation(object):
 
     def __str__(self):
         return 'R(%s, %s)' % (str(self.row_type), str(self.col_type))
+
+    def __repr__(self):
+        return 'R(%s, %s)' % (str(self.row_type), str(self.col_type))

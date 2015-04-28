@@ -90,10 +90,10 @@ scikit-fusion is distributed with few working data fusion scenarios::
 
     >>> from skfusion import datasets
     >>> dicty = datasets.load_dicty()
-    >>> fuser = fusion.Dfmf()
-    >>> fuser.add_relation(dicty.gene, dicty.go_term, dicty.ann.data)
-    >>> fuser.add_relation(dicty.gene, dicty.exprc, dicty.expr.data)
-    >>> fuser.add_constraint(dicty.gene, dicty.ppi.data)
+    >>> print(dicty.objecty_types)
+    {GO term, Experimental condition, Gene}
+    >>> print(dicty.relations)
+    {R(Gene, Gene), R(Gene, Experimental condition), R(Gene, GO term)}
 
 Relevant links
 ==============
