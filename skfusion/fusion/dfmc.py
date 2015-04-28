@@ -1,12 +1,17 @@
 from itertools import product
 
 import numpy as np
+from joblib import Parallel, delayed
 
 from .base import FusionFit
 from .models import _dfmc
 
 
 __all__ = ['Dfmc']
+
+
+def parallel_dfmc_wrapper(**params):
+    return _dfmc.dfmc(**params)
 
 
 class Dfmc(FusionFit):
@@ -70,16 +75,17 @@ class Dfmc(FusionFit):
                         relation.row_type, relation.col_type), [])
                     T[relation.row_type, relation.col_type].append(relation.data)
 
-        self.G, self.S = [], []
-        for run in range(n_run):
-            G, S = _dfmc.dfmc(
-                R=R, M=M, Theta=T, obj_types=object_types,
-                obj_type2rank=object_type2rank, max_iter=self.max_iter,
-                init_type=init_type, stopping=stopping,
-                stopping_system=stopping_system, verbose=verbose,
-                compute_err=compute_err, callback=callback,
-                random_state=random_state, n_jobs=n_jobs)
+        parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
+        task_iter = (delayed(parallel_dfmc_wrapper)(
+            R=R, M=M, Theta=T, obj_types=object_types,
+            obj_type2rank=object_type2rank, max_iter=self.max_iter,
+            init_type=init_type, stopping=stopping, stopping_system=stopping_system,
+            verbose=verbose, compute_err=compute_err, callback=callback,
+            random_state=random_state, n_jobs=n_jobs)
+                     for _ in range(self.n_run))
+        entries = parallelizer(task_iter)
 
+        for G, S in entries:
             for (object_type, _), factor in G.items():
                 self.factors_[object_type].append(factor)
 

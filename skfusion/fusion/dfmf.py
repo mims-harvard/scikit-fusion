@@ -10,7 +10,7 @@ from .models import _dfmf
 __all__ = ['Dfmf', 'DfmfTransform']
 
 
-def parallel_wrapper(**params):
+def parallel_dfmf_wrapper(**params):
     return _dfmf.dfmf(**params)
 
 
@@ -67,12 +67,12 @@ class Dfmf(FusionFit):
                 X[relation.row_type, relation.col_type].append(relation.data)
 
         parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
-        task_iter = (delayed(parallel_wrapper)(
+        task_iter = (delayed(parallel_dfmf_wrapper)(
             R=R, Theta=T, obj_types=object_types, obj_type2rank=object_type2rank,
             max_iter=self.max_iter, init_type=init_type, stopping=stopping,
             stopping_system=stopping_system, verbose=verbose, compute_err=compute_err,
             callback=callback, random_state=self.random_state, n_jobs=n_jobs)
-                     for _ in range(n_run))
+                     for _ in range(self.n_run))
         entries = parallelizer(task_iter)
 
         for G, S in entries:
@@ -83,6 +83,14 @@ class Dfmf(FusionFit):
                 for i, relation in enumerate(self.fusion_graph.get(row_type, col_type)):
                     self.backbones_[relation].append(backbones[i])
         return self
+
+
+def parallel_dfmf_transform_wrapper(fuser, run, **params):
+    G = {(object_type, object_type): fuser.factor(object_type, run)
+         for object_type in fuser.fusion_graph.object_types}
+    S = {(relation.row_type, relation.col_type): [fuser.backbone(relation, run)]
+         for relation in fuser.fusion_graph.relations}
+    return _dfmf.transform(G=G, S=S, **params)
 
 
 class DfmfTransform(FusionTransform):
@@ -105,7 +113,7 @@ class DfmfTransform(FusionTransform):
 
     def transform(self, max_iter=None, init_type=None, stopping=None,
                   stopping_system=None, verbose=0, compute_err=False,
-                  random_state=None):
+                  random_state=None, n_jobs=1):
         """Transform the data into the space given by Fuser.
 
         Parameters
@@ -118,6 +126,7 @@ class DfmfTransform(FusionTransform):
         verbose :
         compute_err :
         random_state :
+        n_jobs :
         """
         max_iter = max_iter if max_iter else self.fuser.max_iter
         init_type = init_type if init_type else self.fuser.init_type
@@ -137,17 +146,16 @@ class DfmfTransform(FusionTransform):
                     relation.row_type, relation.col_type), [])
                 X[relation.row_type, relation.col_type].append(relation.data)
 
-        for run in range(self.fuser.n_run):
-            G = {(object_type, object_type): self.fuser.factor(object_type, run)
-                 for object_type in self.fuser.fusion_graph.object_types}
-            S = {(relation.row_type, relation.col_type): [self.fuser.backbone(relation, run)]
-                 for relation in self.fuser.fusion_graph.relations}
+        parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
+        task_iter = (delayed(parallel_dfmf_transform_wrapper)(
+            self.fuser, run,
+            R_ij=R, Theta_i=T, target_obj_type=self.target,
+            obj_type2rank=object_type2rank, max_iter=max_iter, init_type=init_type,
+            stopping=stopping, stopping_system=stopping_system, verbose=verbose,
+            compute_err=compute_err, random_state=self.random_state)
+                     for run in range(self.fuser.n_run))
+        entries = parallelizer(task_iter)
 
-            G_new = _dfmf.transform(
-                R_ij=R, Theta_i=T, target_obj_type=self.target,
-                obj_type2rank=object_type2rank, G=G, S=S, max_iter=max_iter,
-                init_type=init_type, stopping=stopping, stopping_system=stopping_system,
-                verbose=verbose, compute_err=compute_err, random_state=self.random_state)
-
+        for G_new in entries:
             self.factors_[self.target].append(G_new)
         return self
