@@ -61,19 +61,30 @@ def load_dicty():
 
 def load_pharma():
     """Construct fusion graph from pharmacology domain."""
-    actions = load_source(join('pharma', 'pharma.actions.csv.gz'))
-    pubmed = load_source(join('pharma', 'pharma.pubmed.csv.gz'))
-    depositors = load_source(join('pharma', 'pharma.depositors.csv.gz'))
-    fingerprints = load_source(join('pharma', 'pharma.fingerprints.csv.gz'))
-    depo_cats = load_source(join('pharma', 'pharma.depo_cats.csv.gz'))
-    tanimoto = load_source(join('pharma', 'pharma.tanimoto.csv.gz'))
+    action=ObjectType('Action', 5)
+    pmid=ObjectType('PMID', 5)
+    depositor=ObjectType('Depositor', 5)
+    fingerprint=ObjectType('Fingerprint', 20)
+    depo_cat=ObjectType('Depositor category', 5)
+    chemical=ObjectType('Chemical', 10)
 
-    return FusionGraph(actions=actions, pubmed=pubmed, depositors=depositors,
-                        fingerprints=fingerprints, depo_cats=depo_cats,
-                        tanimoto=tanimoto,
-                        action=ObjectType('Action', 5),
-                        pmid=ObjectType('PMID', 5),
-                        depositor=ObjectType('Depositor', 5),
-                        fingerprint=ObjectType('Fingerprint', 20),
-                        depo_cat=ObjectType('Depositor category', 5),
-                        chemical=ObjectType('Chemical', 10))
+    data, rn, cn = load_source(join('pharma', 'pharma.actions.csv.gz'))
+    actions = Relation(data=data, row_type=chemical, col_type=action,
+                       row_names=rn, col_names=cn)
+    data, rn, cn = load_source(join('pharma', 'pharma.pubmed.csv.gz'))
+    pubmed = Relation(data=data, row_type=chemical, col_type=pmid,
+                      row_names=rn, col_names=cn)
+    data, rn, cn = load_source(join('pharma', 'pharma.depositors.csv.gz'))
+    depositors = Relation(data=data, row_type=chemical, col_type=depositor,
+                          row_names=rn, col_names=cn)
+    data, rn, cn = load_source(join('pharma', 'pharma.fingerprints.csv.gz'))
+    fingerprints = Relation(data=data, row_type=chemical, col_type=fingerprint,
+                            row_names=rn, col_names=cn)
+    data, rn, cn = load_source(join('pharma', 'pharma.depo_cats.csv.gz'))
+    depo_cats = Relation(data=data, row_type=depositor, col_type=depo_cat,
+                         row_names=rn, col_names=cn)
+    data, rn, cn = load_source(join('pharma', 'pharma.tanimoto.csv.gz'))
+    tanimoto = Relation(data=data, row_type=chemical, col_type=chemical,
+                        row_names=rn, col_names=cn)
+
+    return FusionGraph([actions, pubmed, depositors, fingerprints, depo_cats, tanimoto])
