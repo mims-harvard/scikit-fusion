@@ -22,8 +22,7 @@ class TestMultipleRelations(unittest.TestCase):
         self.assertEqual(len(fusion_graph.relations), 3)
         self.assertEqual(len(fusion_graph.object_types), 3)
 
-        fuser = Dfmf(fusion_graph).fuse(init_type='random',
-                                        random_state=rnds)
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relations[0]).shape, (30, 30))
         self.assertEqual(fuser.backbone(relations[1]).shape, (30, 30))
         self.assertEqual(fuser.backbone(relations[2]).shape, (30, 20))
@@ -52,8 +51,7 @@ class TestMultipleRelations(unittest.TestCase):
         self.assertEqual(len(fusion_graph.relations), 3)
         self.assertEqual(len(fusion_graph.object_types), 3)
 
-        fuser = Dfmc(fusion_graph).fuse(init_type='random',
-                                        random_state=rnds)
+        fuser = Dfmc(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relations[0]).shape, (30, 30))
         self.assertEqual(fuser.backbone(relations[1]).shape, (30, 30))
         self.assertEqual(fuser.backbone(relations[2]).shape, (30, 20))

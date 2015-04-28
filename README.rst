@@ -60,8 +60,8 @@ Next, we define our data fusion graph::
 
 and then collectively infer the latent data model::
 
-     >>> fuser = fusion.Dfmf(fusion_graph)
-     >>> fuser.fuse()
+     >>> fuser = fusion.Dfmf()
+     >>> fuser.fuse(fusion_graph)
      >>> print(fuser.factor(t1).shape)
      (50, 10)
 
@@ -79,8 +79,8 @@ for which we define the fusion graph::
 
 and transform new objects to the latent space induced by the ``fuser``::
 
-     >>> transformer = fusion.DfmfTransform(t1, new_graph, fuser)
-     >>> transformer.transform()
+     >>> transformer = fusion.DfmfTransform()
+     >>> transformer.transform(t1, new_graph, fuser)
      >>> print(transformer.factor(t1).shape)
      (10, 10)
 

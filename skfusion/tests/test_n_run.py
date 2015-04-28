@@ -18,8 +18,8 @@ class TestNRun(unittest.TestCase):
         relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
         fusion_graph.add(relations)
 
-        fuser = Dfmf(fusion_graph).fuse(init_type='random',
-                                        random_state=rnds, n_run=3)
+        fuser = Dfmf(init_type='random', random_state=rnds, n_run=3
+                     ).fuse(fusion_graph)
         self.assertEqual(len(list(fuser.factor(t1))), 3)
         self.assertEqual(len(list(fuser.factor(t2))), 3)
         self.assertEqual(len(list(fuser.factor(t3))), 3)
@@ -49,8 +49,8 @@ class TestNRun(unittest.TestCase):
         relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
         fusion_graph.add(relations)
 
-        fuser = Dfmc(fusion_graph).fuse(init_type='random',
-                                        random_state=rnds, n_run=3)
+        fuser = Dfmc(init_type='random', random_state=rnds, n_run=3
+                     ).fuse(fusion_graph)
         self.assertEqual(len(list(fuser.factor(t1))), 3)
         self.assertEqual(len(list(fuser.factor(t2))), 3)
         self.assertEqual(len(list(fuser.factor(t3))), 3)

@@ -3,58 +3,66 @@ from itertools import product
 import numpy as np
 from joblib import Parallel, delayed
 
-from .base import FusionFit
-from .models import _dfmc
+from ..base import FusionFit
+from ._dfmc import dfmc
 
 
 __all__ = ['Dfmc']
 
 
 def parallel_dfmc_wrapper(**params):
-    return _dfmc.dfmc(**params)
+    return dfmc(**params)
 
 
 class Dfmc(FusionFit):
     """Data fusion by matrix completion.
 
-    Parameters
-    ----------
-    fusion_graph :
-
     Attributes
     ---------
     fusion_graph :
-    """
-    def __init__(self, fusion_graph):
-        super(Dfmc, self).__init__(fusion_graph)
+    max_iter :
+    init_type :
+    n_run :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    callback :
+    random_state :
+    n_jobs :
 
-    def fuse(self, max_iter=100, init_type='random_c', n_run=1,
-             stopping=None, stopping_system=None, verbose=0,
-             compute_err=False, callback=None, random_state=None,
-             n_jobs=1):
+    Parameters
+    ----------
+    max_iter :
+    init_type :
+    n_run :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    callback :
+    random_state :
+    n_jobs :
+    """
+    name = 'Dfmc'
+
+    def __init__(self, max_iter=100, init_type='random_c', n_run=1,
+                 stopping=None, stopping_system=None, verbose=0,
+                 compute_err=False, callback=None, random_state=None,
+                 n_jobs=1):
+        super(Dfmc, self).__init__()
+        self._set_params(vars())
+
+    def fuse(self, fusion_graph):
         """Run data fusion completion algorithm.
 
         Parameters
         ----------
-        max_iter :
-        init_type :
-        n_run :
-        stopping :
-        stopping_system :
-        verbose :
-        compute_err :
-        callback :
-        random_state :
-        n_jobs :
+        fusion_graph :
         """
-        self.max_iter = max_iter
-        self.init_type = init_type
-        self.n_run = n_run
-        if isinstance(random_state, np.random.RandomState):
-            random_state = random_state
-        else:
-            random_state = np.random.RandomState(random_state)
-        self.random_state = random_state
+        self.fusion_graph = fusion_graph
+        if not isinstance(self.random_state, np.random.RandomState):
+            self.random_state = np.random.RandomState(self.random_state)
 
         object_types = set([ot for ot in self.fusion_graph.object_types])
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
@@ -75,13 +83,13 @@ class Dfmc(FusionFit):
                         relation.row_type, relation.col_type), [])
                     T[relation.row_type, relation.col_type].append(relation.data)
 
-        parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
+        parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmc_wrapper)(
             R=R, M=M, Theta=T, obj_types=object_types,
-            obj_type2rank=object_type2rank, max_iter=self.max_iter,
-            init_type=init_type, stopping=stopping, stopping_system=stopping_system,
-            verbose=verbose, compute_err=compute_err, callback=callback,
-            random_state=random_state, n_jobs=n_jobs)
+            obj_type2rank=object_type2rank, max_iter=self.max_iter, init_type=self.init_type,
+            stopping=self.stopping, stopping_system=self.stopping_system, verbose=self.verbose,
+            compute_err=self.compute_err, callback=self.callback, random_state=self.random_state,
+            n_jobs=self.n_jobs)
                      for _ in range(self.n_run))
         entries = parallelizer(task_iter)
 

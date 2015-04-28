@@ -3,57 +3,63 @@ from itertools import product
 import numpy as np
 from joblib import Parallel, delayed
 
-from .base import FusionFit, FusionTransform
-from .models import _dfmf
+from ..base import FusionFit, FusionTransform
+from ._dfmf import dfmf, transform
 
 
 __all__ = ['Dfmf', 'DfmfTransform']
 
 
 def parallel_dfmf_wrapper(**params):
-    return _dfmf.dfmf(**params)
+    return dfmf(**params)
 
 
 class Dfmf(FusionFit):
     """Data fusion by matrix factorization.
 
-    Parameters
-    ----------
-    fusion_graph :
-
     Attributes
     ---------
     fusion_graph :
-    """
-    def __init__(self, fusion_graph):
-        super(Dfmf, self).__init__(fusion_graph)
+    max_iter :
+    init_type :
+    n_run :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    callback :
+    random_state :
+    n_jobs :
 
-    def fuse(self, max_iter=100, init_type='random_c', n_run=1,
-             stopping=None, stopping_system=None, verbose=0,
-             compute_err=False, callback=None, random_state=None, n_jobs=1):
+    Parameters
+    ----------
+    max_iter :
+    init_type :
+    n_run :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    callback :
+    random_state :
+    n_jobs :
+    """
+    def __init__(self, max_iter=100, init_type='random_c', n_run=1,
+                 stopping=None, stopping_system=None, verbose=0,
+                 compute_err=False, callback=None, random_state=None, n_jobs=1):
+        super(Dfmf, self).__init__()
+        self._set_params(vars())
+
+    def fuse(self, fusion_graph):
         """Run data fusion factorization algorithm.
 
         Parameters
         ----------
-        max_iter :
-        init_type :
-        n_run :
-        stopping :
-        stopping_system :
-        verbose :
-        compute_err :
-        callback :
-        random_state :
-        n_jobs :
+        fusion_graph :
         """
-        self.max_iter = max_iter
-        self.init_type = init_type
-        self.n_run = n_run
-        if isinstance(random_state, np.random.RandomState):
-            random_state = random_state
-        else:
-            random_state = np.random.RandomState(random_state)
-        self.random_state = random_state
+        self.fusion_graph = fusion_graph
+        if not isinstance(self.random_state, np.random.RandomState):
+            self.random_state = np.random.RandomState(self.random_state)
 
         object_types = set([ot for ot in self.fusion_graph.object_types])
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
@@ -66,12 +72,13 @@ class Dfmf(FusionFit):
                     relation.row_type, relation.col_type), [])
                 X[relation.row_type, relation.col_type].append(relation.data)
 
-        parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
+        parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmf_wrapper)(
             R=R, Theta=T, obj_types=object_types, obj_type2rank=object_type2rank,
-            max_iter=self.max_iter, init_type=init_type, stopping=stopping,
-            stopping_system=stopping_system, verbose=verbose, compute_err=compute_err,
-            callback=callback, random_state=self.random_state, n_jobs=n_jobs)
+            max_iter=self.max_iter, init_type=self.init_type, stopping=self.stopping,
+            stopping_system=self.stopping_system, verbose=self.verbose,
+            compute_err=self.compute_err, callback=self.callback, random_state=self.random_state,
+            n_jobs=self.n_jobs)
                      for _ in range(self.n_run))
         entries = parallelizer(task_iter)
 
@@ -90,51 +97,63 @@ def parallel_dfmf_transform_wrapper(fuser, run, **params):
          for object_type in fuser.fusion_graph.object_types}
     S = {(relation.row_type, relation.col_type): [fuser.backbone(relation, run)]
          for relation in fuser.fusion_graph.relations}
-    return _dfmf.transform(G=G, S=S, **params)
+    return transform(G=G, S=S, **params)
 
 
 class DfmfTransform(FusionTransform):
     """Online data transformer into fused space.
-
-    Parameters
-    ----------
-    target :
-    fusion_graph :
-    fuser :
 
     Attributes
     ----------
     target :
     fusion_graph :
     fuser :
-    """
-    def __init__(self, target, fusion_graph, fuser):
-        super(DfmfTransform, self).__init__(target, fusion_graph, fuser)
+    max_iter :
+    init_type :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    random_state :
+    n_jobs :
 
-    def transform(self, max_iter=None, init_type=None, stopping=None,
-                  stopping_system=None, verbose=0, compute_err=False,
-                  random_state=None, n_jobs=1):
+    Parameters
+    ----------
+    fuser :
+    max_iter :
+    init_type :
+    stopping :
+    stopping_system :
+    verbose :
+    compute_err :
+    random_state :
+    n_jobs :
+    """
+    name = 'Dfmf'
+
+    def __init__(self, max_iter=100, init_type=None, n_run=1, stopping=None,
+                 stopping_system=None, verbose=0, compute_err=False,
+                 random_state=None, n_jobs=1):
+        super(DfmfTransform, self).__init__()
+        self._set_params(vars())
+
+    def transform(self, target, fusion_graph, fuser):
         """Transform the data into the space given by Fuser.
 
         Parameters
         ----------
+        target :
+        fusion_graph :
         fuser :
-        max_iter :
-        init_type :
-        stopping :
-        stopping_system :
-        verbose :
-        compute_err :
-        random_state :
-        n_jobs :
         """
-        max_iter = max_iter if max_iter else self.fuser.max_iter
-        init_type = init_type if init_type else self.fuser.init_type
-        if isinstance(random_state, np.random.RandomState):
-            random_state = random_state
-        else:
-            random_state = np.random.RandomState(random_state)
-        self.random_state = random_state
+        self.target = target
+        self.fusion_graph = fusion_graph
+        self.fuser = fuser
+        self._validate_graph()
+
+        init_type = self.init_type if self.init_type is not None else self.fuser.init_type
+        if not isinstance(self.random_state, np.random.RandomState):
+            self.random_state = np.random.RandomState(self.random_state)
 
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
 
@@ -146,14 +165,14 @@ class DfmfTransform(FusionTransform):
                     relation.row_type, relation.col_type), [])
                 X[relation.row_type, relation.col_type].append(relation.data)
 
-        parallelizer = Parallel(n_jobs=n_jobs, max_nbytes=1e3, verbose=verbose)
+        parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmf_transform_wrapper)(
             self.fuser, run,
             R_ij=R, Theta_i=T, target_obj_type=self.target,
-            obj_type2rank=object_type2rank, max_iter=max_iter, init_type=init_type,
-            stopping=stopping, stopping_system=stopping_system, verbose=verbose,
-            compute_err=compute_err, random_state=self.random_state)
-                     for run in range(self.fuser.n_run))
+            obj_type2rank=object_type2rank, max_iter=self.max_iter, init_type=init_type,
+            stopping=self.stopping, stopping_system=self.stopping_system, verbose=self.verbose,
+            compute_err=self.compute_err, random_state=self.random_state)
+                     for run in range(self.n_run))
         entries = parallelizer(task_iter)
 
         for G_new in entries:

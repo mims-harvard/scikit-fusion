@@ -16,7 +16,7 @@ class TestDfmf(unittest.TestCase):
         fusion_graph = FusionGraph()
         fusion_graph.add(relation)
 
-        fuser = Dfmf(fusion_graph).fuse(init_type='random', random_state=rnds)
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relation).shape, (50, 30))
         self.assertEqual(fuser.factor(t1).shape, (50, 50))
         self.assertEqual(fuser.factor(t2).shape, (30, 30))
@@ -32,15 +32,15 @@ class TestDfmf(unittest.TestCase):
         fusion_graph.add(relation)
 
         rnds = np.random.RandomState(0)
-        fuser = Dfmf(fusion_graph).fuse(init_type='random', random_state=rnds,
-                                        max_iter=100)
+        fuser = Dfmf(init_type='random', random_state=rnds, max_iter=100
+                     ).fuse(fusion_graph)
 
         new_R12 = R12[:2].copy()
         new_graph = FusionGraph(Relation(new_R12, t1, t2))
 
         new_rnds = np.random.RandomState(0)
-        transformer = DfmfTransform(t1, new_graph, fuser).transform(
-            random_state=new_rnds)
+        transformer = DfmfTransform(random_state=new_rnds).transform(
+            t1, new_graph, fuser)
 
         new_G1 = transformer.factor(t1)
         G1 = fuser.factor(t1)

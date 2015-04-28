@@ -1,6 +1,6 @@
 from collections import defaultdict, Iterable
 
-from .fusion import DataFusionError
+from .base import DataFusionError
 
 
 __all__ = ['FusionGraph']

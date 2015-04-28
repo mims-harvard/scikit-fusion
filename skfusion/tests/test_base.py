@@ -20,7 +20,7 @@ class TestBase(unittest.TestCase):
         fusion_graph = FusionGraph()
         fusion_graph.add(relations)
 
-        fuser = Dfmf(fusion_graph).fuse(random_state=rnds)
+        fuser = Dfmf(random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.factor(t1).shape, (50, 30))
         self.assertEqual(fuser.factor(t2).shape, (30, 40))
         self.assertEqual(fuser.factor(t3).shape, (40, 40))
@@ -34,7 +34,7 @@ class TestBase(unittest.TestCase):
         new_relations = [Relation(new_R12, t1, t2), Relation(new_R13, t1, t3)]
         new_graph = FusionGraph(new_relations)
 
-        transformer = DfmfTransform(t1, new_graph, fuser).transform(random_state=rnds)
+        transformer = DfmfTransform(random_state=rnds).transform(t1, new_graph, fuser)
         self.assertEqual(transformer.factor(t1).shape, (15, 30))
 
 
