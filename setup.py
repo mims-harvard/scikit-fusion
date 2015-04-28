@@ -45,13 +45,14 @@ def setup_package():
                     classifiers=['Intended Audience :: Science/Research',
                                  'Intended Audience :: Developers',
                                  'License :: OSI Approved',
+                                 'GNU General Public License v3 or later (GPLv3+)',
                                  'Programming Language :: Python',
                                  'Topic :: Software Development',
                                  'Topic :: Scientific/Engineering',
                                  'Topic :: Scientific/Engineering :: Artificial Intelligence',
                                  'Topic :: Scientific/Engineering :: Bio-Informatics',
                                  'Programming Language :: Python :: 2',
-                                 'Programming Language :: Python :: 2.6',
+                                 'Programming Language :: Python :: 3',
                                  ],)
 
     if (len(sys.argv) >= 2
