@@ -15,7 +15,7 @@ factor models.
 Dependencies
 ============
 
-scikit-fusion is tested to work under Python 3+.
+scikit-fusion is tested to work under Python 3.
 
 The required dependencies to build the software are Numpy >= 1.7, SciPy >= 0.12,
 PyGraphviz >= 1.3 (needed only for drawing data fusion graphs) and Joblib >= 0.8.4.
