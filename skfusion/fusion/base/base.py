@@ -49,7 +49,7 @@ class FusionBase(object):
             raise DataFusionError("Object type %s is not included "
                                   "in the fusion scheme" % object_type.name)
         if object_type not in self.factors_:
-            raise DataFusionError("Fused latent factors are not computed yet.")
+            raise DataFusionError("Unknonw.")
         if self.n_run > 1 and run is None:
             return self._factor_iter(object_type)
         else:
@@ -86,10 +86,8 @@ class FusionBase(object):
         while paths:
             paths_new = []
             for path in paths:
-                expand = [
-                    ot for ot in self.fusion_graph.object_types
-                    if ot in self.fusion_graph.adjacency_matrix[path[-1]]
-                    and ot not in path]
+                expand = [ot for ot in self.fusion_graph.out_neighbors(path[-1])
+                          if ot not in path]
                 refined_paths = [path + [ot] for ot in expand]
                 for refined in refined_paths:
                     if refined[-1] == col_type:
@@ -180,7 +178,7 @@ class FusionFit(FusionBase):
                 or relation.col_type not in self.fusion_graph.object_types:
             raise DataFusionError('Object types are not recognized.')
         if relation not in self.backbones_:
-            raise DataFusionError("Fused latent factors are not computed yet.")
+            raise DataFusionError("Unknown relation.")
         if self.n_run > 1 and run is None:
             return self._backbone_iter(relation)
         else:

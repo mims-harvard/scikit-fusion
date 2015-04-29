@@ -96,7 +96,8 @@ def parallel_dfmf_transform_wrapper(fuser, run, **params):
     G = {(object_type, object_type): fuser.factor(object_type, run)
          for object_type in fuser.fusion_graph.object_types}
     S = {(relation.row_type, relation.col_type): [fuser.backbone(relation, run)]
-         for relation in fuser.fusion_graph.relations}
+         for relation in fuser.fusion_graph.relations
+         if relation.row_type != relation.col_type}
     return transform(G=G, S=S, **params)
 
 

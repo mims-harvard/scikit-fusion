@@ -49,17 +49,17 @@ class TestFusionGraph(unittest.TestCase):
 
     def test_inspection(self):
         fusion_graph = FusionGraph(self.relations2)
-        self.assertEqual(set(fusion_graph.in_neighbors(self.t1)), {self.relations2[6]})
-        self.assertEqual(set(fusion_graph.out_neighbors(self.t1)), set(self.relations2[:2]))
+        self.assertEqual(set(fusion_graph.in_relations(self.t1)), {self.relations2[6]})
+        self.assertEqual(set(fusion_graph.out_relations(self.t1)), set(self.relations2[:2]))
         out_nbs = {self.relations2[4], self.relations2[7], self.relations2[8]}
-        self.assertEqual(set(fusion_graph.out_neighbors(self.t4)), out_nbs)
+        self.assertEqual(set(fusion_graph.out_relations(self.t4)), out_nbs)
 
     def test_retrieval(self):
         fusion_graph = FusionGraph(self.relations2)
         self.assertEqual(fusion_graph.get_object_type('Type 1'), self.t1)
         self.assertEqual(list(fusion_graph.get_relations(self.t1, self.t2)), self.relations2[:2])
         self.assertEqual(fusion_graph[self.t1][self.t2], self.relations2[:2])
-        out_degree1 = len(list(fusion_graph.out_neighbors(self.t4)))
+        out_degree1 = len(list(fusion_graph.out_relations(self.t4)))
         out_degree2 = sum(len(rels) for rels in fusion_graph[self.t4].values())
         self.assertEqual(out_degree1, out_degree2)
 

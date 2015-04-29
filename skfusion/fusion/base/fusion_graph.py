@@ -20,7 +20,7 @@ class FusionGraph(object):
     object_types :
     """
     def __init__(self, relations=()):
-        self.adjacency_matrix = defaultdict(lambda: defaultdict(list))
+        self.adjacency_matrix = {}
         self.relations = {}
         self.object_types = {}
         self.add_relations_from(relations)
@@ -77,7 +77,10 @@ class FusionGraph(object):
         self.relations[relation] = relation
         self.object_types[relation.row_type] = relation.row_type
         self.object_types[relation.col_type] = relation.col_type
-        self.adjacency_matrix[relation.row_type][relation.col_type].append(relation)
+        neighbors = self.adjacency_matrix.get(relation.row_type, {})
+        nbs_list = neighbors.get(relation.col_type, []) + [relation]
+        neighbors[relation.col_type] = nbs_list
+        self.adjacency_matrix[relation.row_type] = neighbors
 
     def add_relations_from(self, relations):
         """Add relations to the fusion graph.
@@ -99,6 +102,8 @@ class FusionGraph(object):
         """
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
         del self.relations[relation]
+        if self.adjacency_matrix[relation.row_type][relation.col_type] == []:
+            del self.adjacency_matrix[relation.row_type][relation.col_type]
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
             self.remove_object_type(relation.row_type)
@@ -158,7 +163,7 @@ class FusionGraph(object):
             raise DataFusionError("Object types are not recognized.")
         if col_type is not None and col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
-        return iter(self.adjacency_matrix[row_type][col_type])
+        return iter(self.adjacency_matrix.get(row_type, {}).get(col_type, []))
 
     def get_object_type(self, name):
         """Return object type whose name is provided.
@@ -171,7 +176,7 @@ class FusionGraph(object):
                        if obj_type.name == name]
         return object_types if len(object_types) != 1 else object_types[0]
 
-    def out_neighbors(self, object_type):
+    def out_relations(self, object_type):
         """Return an iterator for relations adjacent to the object type.
 
         Parameters
@@ -188,7 +193,7 @@ class FusionGraph(object):
             for relation in self.adjacency_matrix[object_type][col_type]:
                 yield relation
 
-    def in_neighbors(self, object_type):
+    def in_relations(self, object_type):
         """Return an iterator for relations adjacent to the object type.
 
         Parameters
@@ -201,9 +206,42 @@ class FusionGraph(object):
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
-        for row_type in self.adjacency_matrix.keys():
-            for relation in self.adjacency_matrix[row_type][object_type]:
+        for row_type in self.adjacency_matrix:
+            for relation in self.adjacency_matrix[row_type].get(object_type, {}):
                 yield relation
+
+    def out_neighbors(self, object_type):
+        """Return an iterator for object types adjacent to the object type.
+
+        Parameters
+        ----------
+        object_type : Object type identifier
+
+        Returns
+        -------
+        relation : an iterator
+        """
+        if object_type not in self.object_types:
+            raise DataFusionError("Object type not in the fusion graph.")
+        return iter(self.adjacency_matrix.get(object_type, {}).keys())
+
+    def in_neighbors(self, object_type):
+        """Return an iterator for object types adjacent to the object type.
+
+        Parameters
+        ----------
+        object_type : Object type identifier
+
+        Returns
+        -------
+        relation : an iterator
+        """
+        if object_type not in self.object_types:
+            raise DataFusionError("Object type not in the fusion graph.")
+        for row_type in self.adjacency_matrix.keys():
+            if object_type in self.adjacency_matrix[row_type]:
+                if len(self.adjacency_matrix[row_type][object_type]) > 0:
+                    yield row_type
 
     def __str__(self):
         return "{}(Object types: {}, Relations: {})".format(
