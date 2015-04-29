@@ -25,6 +25,14 @@ class FusionGraph(object):
         self.object_types = {}
         self.add_relations_from(relations)
 
+    @property
+    def n_relations(self):
+        return len(self.relations)
+
+    @property
+    def n_object_types(self):
+        return len(self.object_types)
+
     def draw_graphviz(self, filename):
         """Draw the data fusion graph and save it to a file (SVG).
 
@@ -84,13 +92,13 @@ class FusionGraph(object):
         relation :
         """
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
+        del self.relations[relation]
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
             self.remove_object_type(relation.row_type)
         if not list(self.in_neighbors(relation.col_type)) and \
                 not list(self.out_neighbors(relation.col_type)):
             self.remove_object_type(relation.col_type)
-        del self.relations[relation]
 
     def remove_relations_from(self, relations):
         """Remove relations from the fusion graph.
