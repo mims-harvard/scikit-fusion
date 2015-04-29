@@ -16,7 +16,7 @@ class TestNRun(unittest.TestCase):
         t3 = ObjectType('type3', 10)
         fusion_graph = FusionGraph()
         relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
 
         fuser = Dfmf(init_type='random', random_state=rnds, n_run=3
                      ).fuse(fusion_graph)
@@ -47,7 +47,7 @@ class TestNRun(unittest.TestCase):
         t3 = ObjectType('type3', 10)
         fusion_graph = FusionGraph()
         relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
 
         fuser = Dfmc(init_type='random', random_state=rnds, n_run=3
                      ).fuse(fusion_graph)

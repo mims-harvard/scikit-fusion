@@ -18,7 +18,7 @@ class TestBase(unittest.TestCase):
         relations = [Relation(R12, t1, t2),
                      Relation(R13, t1, t3), Relation(R23, t2, t3)]
         fusion_graph = FusionGraph()
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
 
         fuser = Dfmf(random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.factor(t1).shape, (50, 30))

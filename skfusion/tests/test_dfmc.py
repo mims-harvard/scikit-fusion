@@ -14,7 +14,7 @@ class TestDfmc(unittest.TestCase):
         t2 = ObjectType('type2', 30)
         relation = Relation(R12, t1, t2)
         fusion_graph = FusionGraph()
-        fusion_graph.add(relation)
+        fusion_graph.add_relation(relation)
 
         fuser = Dfmc(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relation).shape, (50, 30))
@@ -31,7 +31,7 @@ class TestDfmc(unittest.TestCase):
         t2 = ObjectType('type2', 30)
         relation = Relation(R12, t1, t2, mask=mask)
         fusion_graph = FusionGraph()
-        fusion_graph.add(relation)
+        fusion_graph.add_relation(relation)
 
         fuser = Dfmc(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relation).shape, (50, 30))

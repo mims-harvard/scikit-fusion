@@ -23,7 +23,7 @@ class TestFusionGraph(unittest.TestCase):
                      Relation(R34, t3, t4), Relation(R45, t4, t5),
                      Relation(R35, t3, t5), Relation(R51, t5, t1)]
         fusion_graph = FusionGraph()
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
         # fusion_graph.draw_graphviz('test_fusion_graph.pdf')
 
 

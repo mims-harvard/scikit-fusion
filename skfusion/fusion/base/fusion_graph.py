@@ -23,7 +23,7 @@ class FusionGraph(object):
         self.adjacency_matrix = defaultdict(lambda: defaultdict(list))
         self.relations = {}
         self.object_types = {}
-        self.add(relations)
+        self.add_relations_from(relations)
 
     def draw_graphviz(self, filename):
         """Draw the data fusion graph and save it to a file (SVG).
@@ -53,22 +53,83 @@ class FusionGraph(object):
                 fus_graph.add_edge(ot1.name, ot1.name, label=label)
         fus_graph.draw(filename, format='pdf', prog='dot')
 
-    def add(self, relations):
-        """Include a relation/constraint matrix into a fusion graph.
+    def add_relation(self, relation):
+        """Add a single relation to the fusion graph.
 
         Parameters
         ----------
-        relations :
+        relation :
         """
-        if not isinstance(relations, Iterable):
-            relations = [relations]
-        for relation in relations:
-            self.relations[relation] = relation
-            self.object_types[relation.row_type] = relation.row_type
-            self.object_types[relation.col_type] = relation.col_type
-            self.adjacency_matrix[relation.row_type][relation.col_type].append(relation)
+        self.relations[relation] = relation
+        self.object_types[relation.row_type] = relation.row_type
+        self.object_types[relation.col_type] = relation.col_type
+        self.adjacency_matrix[relation.row_type][relation.col_type].append(relation)
 
-    def get(self, row_type, col_type=None):
+    def add_relations_from(self, relations):
+        """Add relations to the fusion graph.
+
+        Parameters
+        ----------
+        relations : container of relations
+        """
+        for relation in relations:
+            self.add_relation(relation)
+
+
+    def remove_relation(self, relation):
+        """Remove a single relation from the fusion graph.
+
+        Parameters
+        ----------
+        relation :
+        """
+        self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
+        if not list(self.in_neighbors(relation.row_type)) and \
+                not list(self.out_neighbors(relation.row_type)):
+            self.remove_object_type(relation.row_type)
+        if not list(self.in_neighbors(relation.col_type)) and \
+                not list(self.out_neighbors(relation.col_type)):
+            self.remove_object_type(relation.col_type)
+        del self.relations[relation]
+
+    def remove_relations_from(self, relations):
+        """Remove relations from the fusion graph.
+
+        Parameters
+        ----------
+        relations : container of relations
+        """
+        for relation in relations:
+            self.remove_relation(relation)
+
+    def remove_object_type(self, object_type):
+        """Remove a single relation from the fusion graph.
+
+        Parameters
+        ----------
+        object_type :
+        """
+        for relation in self.relations:
+            if object_type == relation.row_type or object_type == relation.col_type:
+                self.remove_relation(relation)
+        del self.adjacency_matrix[object_type]
+        for obj_type in self.adjacency_matrix:
+            if object_type in self.adjacency_matrix[obj_type]:
+                del self.adjacency_matrix[obj_type][object_type]
+        del self.object_types[object_type]
+
+    def remove_object_types_from(self, object_types):
+        """Remove relations from the fusion graph.
+
+        Parameters
+        ----------
+        object_types: container of object_types
+        """
+        for object_type in object_types:
+            self.remove_object_type(object_type)
+
+
+    def get_relation(self, row_type, col_type=None):
         """Return an iterator for relation matrices between two types of objects.
 
         Parameters

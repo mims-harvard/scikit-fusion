@@ -18,7 +18,7 @@ class TestMultipleRelations(unittest.TestCase):
         relations = [Relation(R12_1, t1, t2), Relation(R12_2, t1, t2),
                      Relation(R13, t1, t3)]
         fusion_graph = FusionGraph()
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
         self.assertEqual(len(fusion_graph.relations), 3)
         self.assertEqual(len(fusion_graph.object_types), 3)
 
@@ -47,7 +47,7 @@ class TestMultipleRelations(unittest.TestCase):
         relations = [Relation(R12_1, t1, t2), Relation(R12_2, t1, t2),
                      Relation(R13, t1, t3)]
         fusion_graph = FusionGraph()
-        fusion_graph.add(relations)
+        fusion_graph.add_relations_from(relations)
         self.assertEqual(len(fusion_graph.relations), 3)
         self.assertEqual(len(fusion_graph.object_types), 3)
 
