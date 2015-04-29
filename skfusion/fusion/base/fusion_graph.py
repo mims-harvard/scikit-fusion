@@ -33,6 +33,12 @@ class FusionGraph(object):
     def n_object_types(self):
         return len(self.object_types)
 
+    def __getitem__(self, key):
+        return self.adjacency_matrix[key]
+
+    def __setitem__(self, key, value):
+        self.adjacency_matrix[key] = value
+
     def draw_graphviz(self, filename):
         """Draw the data fusion graph and save it to a file (SVG).
 

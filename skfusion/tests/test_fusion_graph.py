@@ -14,15 +14,17 @@ class TestFusionGraph(unittest.TestCase):
         self.t3 = ObjectType('Type 3', 10)
         self.t4 = ObjectType('Type 4', 10)
         self.t5 = ObjectType('Type 5', 10)
-        self. relations1 = [Relation(X, self.t1, self.t2), Relation(X, self.t2, self.t3),
-                            Relation(X, self.t3, self.t4), Relation(X, self.t4, self.t5),
-                            Relation(X, self.t3, self.t5), Relation(X, self.t5, self.t1)]
+        self. relations1 = [
+            Relation(X, self.t1, self.t2), Relation(X, self.t2, self.t3),
+            Relation(X, self.t3, self.t4), Relation(X, self.t4, self.t5),
+            Relation(X, self.t3, self.t5), Relation(X, self.t5, self.t1)]
 
-        self.relations2 = [Relation(X, self.t1, self.t2), Relation(X, self.t1, self.t2),
-                           Relation(X, self.t2, self.t3), Relation(X, self.t3, self.t4),
-                           Relation(X, self.t4, self.t5), Relation(X, self.t3, self.t5),
-                           Relation(X, self.t5, self.t1), Relation(X, self.t4, self.t4),
-                           Relation(X, self.t4, self.t4), Relation(X, self.t5, self.t5)]
+        self.relations2 = [
+            Relation(X, self.t1, self.t2), Relation(X, self.t1, self.t2),
+            Relation(X, self.t2, self.t3), Relation(X, self.t3, self.t4),
+            Relation(X, self.t4, self.t5), Relation(X, self.t3, self.t5),
+            Relation(X, self.t5, self.t1), Relation(X, self.t4, self.t4),
+            Relation(X, self.t4, self.t4), Relation(X, self.t5, self.t5)]
 
     def test_drawing(self):
         fusion_graph = FusionGraph()
