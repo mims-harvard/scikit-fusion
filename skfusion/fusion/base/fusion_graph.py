@@ -92,7 +92,9 @@ class FusionGraph(object):
             self.__class__.__name__, len(self.object_types), len(self.relations))
 
     def __repr__(self):
-        return "{}"
+        return "{}(Object types={}, Relations={})".format(
+            self.__class__.__name__, repr(list(self.object_types.values())),
+            repr(list(self.relations.values())))
 
 
 class ObjectType(object):
@@ -151,4 +153,4 @@ class Relation(object):
 
     def __repr__(self):
         return "{}({}, {})".format(
-            self.__class__.__name__, str(self.row_type), str(self.col_type))
+            self.__class__.__name__, repr(self.row_type), repr(self.col_type))

@@ -9,7 +9,7 @@ scikit-fusion
 .. |Travis| image:: https://travis-ci.org/marinkaz/scikit-fusion.svg?branch=master
 .. _Travis: https://travis-ci.org/marinkaz/scikit-fusion
 
-scikit-fusion is a Python module for data fusion based on recent collective latent
+*scikit-fusion* is a Python module for data fusion based on recent collective latent
 factor models.
 
 Dependencies
@@ -50,9 +50,9 @@ Let's generate three random data matrices describing three different object type
 Next, we define our data fusion graph::
 
      >>> from skfusion import fusion
-     >>> t1 = fusion.ObjectType('type1', 10)
-     >>> t2 = fusion.ObjectType('type2', 20)
-     >>> t3 = fusion.ObjectType('type3', 30)
+     >>> t1 = fusion.ObjectType('Type 1', 10)
+     >>> t2 = fusion.ObjectType('Type 2', 20)
+     >>> t3 = fusion.ObjectType('Type 3', 30)
      >>> relations = [fusion.Relation(R12, t1, t2),
             fusion.Relation(R13, t1, t3), fusion.Relation(R23, t2, t3)]
      >>> fusion_graph = fusion.FusionGraph()
@@ -90,10 +90,14 @@ scikit-fusion is distributed with few working data fusion scenarios::
 
     >>> from skfusion import datasets
     >>> dicty = datasets.load_dicty()
+    >>> print(dicty)
+    FusionGraph(Object types: 3, Relations: 3)
     >>> print(dicty.object_types)
     {ObjectType(GO term), ObjectType(Experimental condition), ObjectType(Gene)}
     >>> print(dicty.relations)
-    {Relation(ObjectType(Gene), ObjectType(GO term)), Relation(ObjectType(Gene), ObjectType(Gene)), Relation(ObjectType(Gene), ObjectType(Experimental condition))}
+    {Relation(ObjectType(Gene), ObjectType(GO term)),
+        Relation(ObjectType(Gene), ObjectType(Gene)),
+        Relation(ObjectType(Gene), ObjectType(Experimental condition))}
 
 Relevant links
 ==============
