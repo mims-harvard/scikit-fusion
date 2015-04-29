@@ -69,7 +69,7 @@ class FusionGraph(object):
             self.adjacency_matrix[relation.row_type][relation.col_type].append(relation)
 
     def get(self, row_type, col_type=None):
-        """Return a relation matrix between two types of objects.
+        """Return an iterator for relation matrices between two types of objects.
 
         Parameters
         ----------
@@ -78,7 +78,7 @@ class FusionGraph(object):
 
         Returns
         -------
-        relation :  generator
+        relation :  an iterator
         """
         if row_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
@@ -86,6 +86,40 @@ class FusionGraph(object):
             raise DataFusionError("Object types are not recognized.")
         for relation in self.adjacency_matrix[row_type][col_type]:
             yield relation
+
+    def out_neighbors(self, object_type):
+        """Return an iterator for relations adjacent to the object type.
+
+        Parameters
+        ----------
+        object_type : Object type identifier
+
+        Returns
+        -------
+        relation : an iterator
+        """
+        if object_type not in self.object_types:
+            raise DataFusionError("Object type not in the fusion graph.")
+        for col_type in self.adjacency_matrix[object_type]:
+            for relation in self.adjacency_matrix[object_type][col_type]:
+                yield relation
+
+    def in_neighbors(self, object_type):
+        """Return an iterator for relations adjacent to the object type.
+
+        Parameters
+        ----------
+        object_type : Object type identifier
+
+        Returns
+        -------
+        relation : an iterator
+        """
+        if object_type not in self.object_types:
+            raise DataFusionError("Object type not in the fusion graph.")
+        for row_type in self.adjacency_matrix.keys():
+            for relation in self.adjacency_matrix[row_type][object_type]:
+                yield relation
 
     def __str__(self):
         return "{}(Object types: {}, Relations: {})".format(
@@ -119,10 +153,10 @@ class ObjectType(object):
         return self.name != other
 
     def __str__(self):
-        return "{}({})".format(self.__class__.__name__, self.name)
+        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
 
     def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, self.name)
+        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
 
 
 class Relation(object):
