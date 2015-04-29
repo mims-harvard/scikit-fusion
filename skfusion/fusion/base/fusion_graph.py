@@ -153,8 +153,7 @@ class FusionGraph(object):
             raise DataFusionError("Object types are not recognized.")
         if col_type is not None and col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
-        for relation in self.adjacency_matrix[row_type][col_type]:
-            yield relation
+        return iter(self.adjacency_matrix[row_type][col_type])
 
     def out_neighbors(self, object_type):
         """Return an iterator for relations adjacent to the object type.
