@@ -3,7 +3,7 @@ from collections import defaultdict, Iterable
 from .base import DataFusionError
 
 
-__all__ = ['FusionGraph']
+__all__ = ['FusionGraph', 'Relation', 'ObjectType']
 
 
 class FusionGraph(object):
@@ -86,3 +86,69 @@ class FusionGraph(object):
             raise DataFusionError("Object types are not recognized.")
         for relation in self.adjacency_matrix[row_type][col_type]:
             yield relation
+
+    def __str__(self):
+        return "{}(Object types: {}, Relations: {})".format(
+            self.__class__.__name__, len(self.object_types), len(self.relations))
+
+    def __repr__(self):
+        return "{}"
+
+
+class ObjectType(object):
+    """Object type used for fusion.
+
+    Attributes
+    ----------
+    name :
+    rank :
+    """
+    def __init__(self, name, rank=5):
+        self.name = name
+        self.rank = rank
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def __eq__(self, other):
+        return self.name == other
+
+    def __ne__(self, other):
+        return self.name != other
+
+    def __str__(self):
+        return "{}({})".format(self.__class__.__name__, self.name)
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self.name)
+
+
+class Relation(object):
+    """Relation used for data fusion.
+
+    Attributes
+    ----------
+    data :
+    row_type :
+    col_type :
+    mask :
+    row_names :
+    col_names :
+    """
+    def __init__(self, data, row_type, col_type, mask=None,
+                 row_names=None, col_names=None, **kwargs):
+        self.__dict__.update(vars())
+        self.__dict__.update(kwargs)
+        del self.__dict__['kwargs']
+        del self.__dict__['self']
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def __str__(self):
+        return "{}({}, {})".format(
+            self.__class__.__name__, str(self.row_type), str(self.col_type))
+
+    def __repr__(self):
+        return "{}({}, {})".format(
+            self.__class__.__name__, str(self.row_type), str(self.col_type))

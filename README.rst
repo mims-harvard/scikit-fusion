@@ -42,7 +42,7 @@ Usage
 
 Let's generate three random data matrices describing three different object types::
 
-     >>> import numpy as np
+     >>> import numpy as npw
      >>> R12 = np.random.rand(50, 100)
      >>> R13 = np.random.rand(50, 40)
      >>> R23 = np.random.rand(100, 40)
@@ -90,10 +90,10 @@ scikit-fusion is distributed with few working data fusion scenarios::
 
     >>> from skfusion import datasets
     >>> dicty = datasets.load_dicty()
-    >>> print(dicty.objecty_types)
-    {GO term, Experimental condition, Gene}
+    >>> print(dicty.object_types)
+    {ObjectType(GO term), ObjectType(Experimental condition), ObjectType(Gene)}
     >>> print(dicty.relations)
-    {R(Gene, Gene), R(Gene, Experimental condition), R(Gene, GO term)}
+    {Relation(ObjectType(Gene), ObjectType(GO term)), Relation(ObjectType(Gene), ObjectType(Gene)), Relation(ObjectType(Gene), ObjectType(Experimental condition))}
 
 Relevant links
 ==============

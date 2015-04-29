@@ -129,8 +129,6 @@ class DfmfTransform(FusionTransform):
     random_state :
     n_jobs :
     """
-    name = 'Dfmf'
-
     def __init__(self, max_iter=100, init_type=None, n_run=1, stopping=None,
                  stopping_system=None, verbose=0, compute_err=False,
                  random_state=None, n_jobs=1):

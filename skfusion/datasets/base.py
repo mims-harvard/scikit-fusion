@@ -48,11 +48,9 @@ def load_dicty():
 
     data, rn, cn = load_source(join('dicty', 'dicty.gene_annnotations.csv.gz'))
     ann = Relation(data=data, row_type=gene, col_type=go_term, row_names=rn, col_names=cn)
-
     data, rn, cn = load_source(join('dicty', 'dicty.gene_expression.csv.gz'))
     expr = Relation(data=data, row_type=gene, col_type=exprc, row_names=rn, col_names=cn)
     expr.data = np.log(np.maximum(expr.data, np.finfo(np.float).eps))
-
     data, rn, cn = load_source(join('dicty', 'dicty.ppi.csv.gz'))
     ppi = Relation(data=data, row_type=gene, col_type=gene, row_names=rn, col_names=cn)
 
@@ -60,7 +58,7 @@ def load_dicty():
 
 
 def load_pharma():
-    """Construct fusion graph from pharmacology domain."""
+    """Construct fusion graph from the pharmacology domain."""
     action=ObjectType('Action', 5)
     pmid=ObjectType('PMID', 5)
     depositor=ObjectType('Depositor', 5)

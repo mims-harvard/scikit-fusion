@@ -44,8 +44,6 @@ class Dfmc(FusionFit):
     random_state :
     n_jobs :
     """
-    name = 'Dfmc'
-
     def __init__(self, max_iter=100, init_type='random_c', n_run=1,
                  stopping=None, stopping_system=None, verbose=0,
                  compute_err=False, callback=None, random_state=None,

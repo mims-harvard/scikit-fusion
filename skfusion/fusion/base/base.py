@@ -98,9 +98,13 @@ class FusionBase(object):
                         paths_new.append(refined)
             paths = paths_new
 
+    def __str__(self):
+        pparams = ', '.join('{}={}'.format(k, v) for k, v in self._params.items())
+        return '{}({})'.format(self.__class__.__name__, pparams)
+
     def __repr__(self):
         pparams = ', '.join('{}={}'.format(k, v) for k, v in self._params.items())
-        return '{}({})'.format(self.name, pparams)
+        return '{}({})'.format(self.__class__.__name__, pparams)
 
 
 class FusionFit(FusionBase):
