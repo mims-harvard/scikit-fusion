@@ -66,7 +66,7 @@ class Dfmf(FusionFit):
 
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
-            for relation in self.fusion_graph.get_relation(row_type, col_type):
+            for relation in self.fusion_graph.get_relations(row_type, col_type):
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
@@ -87,7 +87,7 @@ class Dfmf(FusionFit):
                 self.factors_[object_type].append(factor)
 
             for (row_type, col_type), backbones in S.items():
-                for i, relation in enumerate(self.fusion_graph.get_relation(row_type, col_type)):
+                for i, relation in enumerate(self.fusion_graph.get_relations(row_type, col_type)):
                     self.backbones_[relation].append(backbones[i])
         return self
 
@@ -157,7 +157,7 @@ class DfmfTransform(FusionTransform):
 
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
-            for relation in self.fusion_graph.get_relation(row_type, col_type):
+            for relation in self.fusion_graph.get_relations(row_type, col_type):
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])

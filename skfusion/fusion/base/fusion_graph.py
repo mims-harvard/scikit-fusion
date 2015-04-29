@@ -142,8 +142,7 @@ class FusionGraph(object):
         for object_type in object_types:
             self.remove_object_type(object_type)
 
-
-    def get_relation(self, row_type, col_type=None):
+    def get_relations(self, row_type, col_type=None):
         """Return an iterator for relation matrices between two types of objects.
 
         Parameters
@@ -160,6 +159,17 @@ class FusionGraph(object):
         if col_type is not None and col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
         return iter(self.adjacency_matrix[row_type][col_type])
+
+    def get_object_type(self, name):
+        """Return object type whose name is provided.
+
+        Parameters
+        ----------
+        name :
+        """
+        object_types = [obj_type for obj_type in self.object_types
+                       if obj_type.name == name]
+        return object_types if len(object_types) != 1 else object_types[0]
 
     def out_neighbors(self, object_type):
         """Return an iterator for relations adjacent to the object type.
