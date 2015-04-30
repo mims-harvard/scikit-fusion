@@ -19,7 +19,7 @@ print(__doc__)
 from sklearn import cross_validation, ensemble, metrics
 import numpy as np
 
-from skfusion.datasets import load_dicty
+from skfusion import datasets
 from skfusion import fusion as skf
 
 
@@ -89,7 +89,7 @@ def main():
 
 
 if __name__ == "__main__":
-    dicty = load_dicty()
+    dicty = datasets.load_dicty()
     gene = dicty.get_object_type("Gene")
     go_term = dicty.get_object_type("GO term")
     exp_cond = dicty.get_object_type("Experimental condition")

@@ -15,7 +15,7 @@ from functools import reduce
 from sklearn import cross_validation, metrics, ensemble
 import numpy as np
 
-from skfusion.datasets import load_pharma
+from skfusion import datasets
 from skfusion import fusion as skf
 
 
@@ -88,7 +88,6 @@ def main():
     n_chemicals, n_actions = pharma[chemical][action][0].data.shape
     for t, action_idx in enumerate(range(n_actions)):
         y_true = pharma[chemical][action][0].data[:, action_idx]
-
         cls_size = int(y_true.sum())
         if cls_size > n_chemicals - 20 or cls_size < 20:
             continue
@@ -104,7 +103,7 @@ def main():
 
 
 if __name__ == "__main__":
-    pharma = load_pharma()
+    pharma = datasets.load_pharma()
     action = pharma.get_object_type('Action')
     pmid = pharma.get_object_type('PMID')
     depositor = pharma.get_object_type('Depositor')
