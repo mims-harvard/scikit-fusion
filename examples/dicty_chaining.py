@@ -22,17 +22,17 @@ from sklearn import cross_validation, ensemble, metrics
 import numpy as np
 
 from skfusion.datasets import load_dicty
-from skfusion import fusion
+from skfusion import fusion as skf
 
 
 def fuse(train_idx):
     relations = [
-        fusion.Relation(dicty[gene][go_term][0].data[train_idx, :], gene, go_term),
-        fusion.Relation(dicty[gene][exp_cond][0].data[train_idx, :], gene, exp_cond),
-        fusion.Relation(dicty[gene][gene][0].data[train_idx, :][:, train_idx], gene, gene)]
-    fusion_graph = fusion.FusionGraph(relations)
+        skf.Relation(dicty[gene][go_term][0].data[train_idx, :], gene, go_term),
+        skf.Relation(dicty[gene][exp_cond][0].data[train_idx, :], gene, exp_cond),
+        skf.Relation(dicty[gene][gene][0].data[train_idx, :][:, train_idx], gene, gene)]
+    fusion_graph = skf.FusionGraph(relations)
 
-    fuser = fusion.Dfmf(max_iter=50, init_type="random_vcol")
+    fuser = skf.Dfmf(max_iter=50, init_type="random_vcol")
     fuser.fuse(fusion_graph)
     return fuser, fusion_graph
 
@@ -55,10 +55,10 @@ def profile(fuser, transformer):
 
 def transform(fuser, test_idx):
     relations = [
-        fusion.Relation(dicty[gene][exp_cond][0].data[test_idx, :], gene, exp_cond),
-        fusion.Relation(dicty[gene][gene][0].data[test_idx, :][:, test_idx], gene, gene)]
-    fusion_graph = fusion.FusionGraph(relations)
-    transformer = fusion.DfmfTransform(max_iter=50, init_type="random_vcol")
+        skf.Relation(dicty[gene][exp_cond][0].data[test_idx, :], gene, exp_cond),
+        skf.Relation(dicty[gene][gene][0].data[test_idx, :][:, test_idx], gene, gene)]
+    fusion_graph = skf.FusionGraph(relations)
+    transformer = skf.DfmfTransform(max_iter=50, init_type="random_vcol")
     transformer.transform(gene, fusion_graph, fuser)
     return transformer
 

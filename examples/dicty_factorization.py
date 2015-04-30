@@ -20,19 +20,19 @@ from sklearn import cross_validation, ensemble, metrics
 import numpy as np
 
 from skfusion.datasets import load_dicty
-from skfusion import fusion
+from skfusion import fusion as skf
 
 
 def mf(train_idx, test_idx, term_idx):
     ann = dicty[gene][go_term][0].data.copy()
     ann[test_idx, :] = 0
     relations = [
-        fusion.Relation(ann, gene, go_term),
-        fusion.Relation(dicty[gene][exp_cond][0].data, gene, exp_cond),
-        fusion.Relation(dicty[gene][gene][0].data, gene, gene)]
-    fusion_graph = fusion.FusionGraph(relations)
+        skf.Relation(ann, gene, go_term),
+        skf.Relation(dicty[gene][exp_cond][0].data, gene, exp_cond),
+        skf.Relation(dicty[gene][gene][0].data, gene, gene)]
+    fusion_graph = skf.FusionGraph(relations)
 
-    fuser = fusion.Dfmf(max_iter=10, n_run=1, init_type="random_vcol", random_state=0)
+    fuser = skf.Dfmf(max_iter=10, n_run=1, init_type="random_vcol", random_state=0)
 
     p = 0.7
     gene.rank = p * dicty[gene][go_term][0].data.shape[0]
