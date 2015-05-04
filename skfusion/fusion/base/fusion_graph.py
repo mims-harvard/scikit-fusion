@@ -90,12 +90,10 @@ class FusionGraph(object):
             ax.figure.savefig(filename, **kwargs)
         return G
 
-    def draw_graphviz(self, filename):
-        """Draw the data fusion graph and save it to a file (SVG).
+    def draw_graphviz(self, *args, **kwargs):
+        """Draw the data fusion graph using PyGraphviz and save it to a file.
 
-        Parameters
-        ----------
-        filename :
+        This method passes arguments to `pygraphviz.AGraph.draw()` method.
         """
         import pygraphviz as pgv
         fus_graph = pgv.AGraph(strict=False, directed=True)
@@ -116,7 +114,8 @@ class FusionGraph(object):
                 label = '<<b>&Theta;</b><SUB>%s</SUB>' \
                         '<SUP>%d</SUP><br/>>' % (ot1.name, ot2count[ot1, ot2])
                 fus_graph.add_edge(ot1.name, ot1.name, label=label)
-        fus_graph.draw(filename, format='pdf', prog='dot')
+        if len(args) < 3 and 'prog' not in kwargs: kwargs['prog'] = 'dot'
+        fus_graph.draw(*args, **kwargs)
 
     def add_relation(self, relation):
         """Add a single relation to the fusion graph.
