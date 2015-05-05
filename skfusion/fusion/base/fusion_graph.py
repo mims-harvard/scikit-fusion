@@ -93,29 +93,42 @@ class FusionGraph(object):
     def draw_graphviz(self, *args, **kwargs):
         """Draw the data fusion graph using PyGraphviz and save it to a file.
 
-        This method passes arguments to `pygraphviz.AGraph.draw()` method.
+        Parameters
+        ----------
+        verbose_edges : bool, optional
+            Annote edge labels with relations' matrix shape information.
+
+        *args, **kwargs : optional
+            Passed to `pygraphviz.AGraph.draw()` method.
         """
+        verbose_edges = kwargs.pop('verbose_edges', False)
         import pygraphviz as pgv
-        fus_graph = pgv.AGraph(strict=False, directed=True)
-        # object types
-        for ot in self.object_types:
-            fus_graph.add_node(ot.name)
-        # relations
-        ot2count = defaultdict(int)
-        for relation in self.relations:
-            ot1 = relation.row_type
-            ot2 = relation.col_type
-            ot2count[ot1, ot2] += 1
-            if ot1 != ot2:
-                label = '<<b>R</b><SUB>%s,%s</SUB><SUP>%d</SUP>' \
-                        '<br/>>' % (ot1.name, ot2.name, ot2count[ot1, ot2])
-                fus_graph.add_edge(ot1.name, ot2.name, text=label)
+        G = pgv.AGraph(strict=False, directed=True)
+        G.node_attr['fontsize'] = 11
+        G.edge_attr['fontsize'] = 9
+        G.node_attr['fontname'] = \
+        G.edge_attr['fontname'] = 'sans-serif'
+
+        G.add_nodes_from(o.name for o in self.object_types)
+
+        relations = defaultdict(list)
+        for rel in self.relations:
+            relations[(rel.row_type, rel.col_type)].append(rel)
+        for (ot1, ot2), rels in relations.items():
+            if ot1 == ot2:
+                label = '<b>&Theta;</b><font point-size="6">%s</font>' % ot1.name
             else:
-                label = '<<b>&Theta;</b><SUB>%s</SUB>' \
-                        '<SUP>%d</SUP><br/>>' % (ot1.name, ot2count[ot1, ot2])
-                fus_graph.add_edge(ot1.name, ot1.name, label=label)
-        if len(args) < 3 and 'prog' not in kwargs: kwargs['prog'] = 'dot'
-        fus_graph.draw(*args, **kwargs)
+                label = '<b>R</b><font point-size="6">%s,%s</font>' % (ot1.name, ot2.name)
+            if verbose_edges:
+                for relation in rels:
+                    label += ('<br/> <font color="grey">[%dx%d]</font>' %
+                              relation.data.shape)
+            label = '< ' + label + '>'
+            G.add_edge(ot1.name, ot2.name, label=label)
+
+        if len(args) < 3 and 'prog' not in kwargs:
+            kwargs['prog'] = 'dot'
+        G.draw(*args, **kwargs)
 
     def add_relation(self, relation):
         """Add a single relation to the fusion graph.
