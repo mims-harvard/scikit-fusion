@@ -39,6 +39,55 @@ class FusionGraph(object):
     def __setitem__(self, key, value):
         self.adjacency_matrix[key] = value
 
+    def draw_networkx(self, filename=None, ax=None, *args, **kwargs):
+        """Draw the data fusion graph using NetworkX and Matplotlib.
+
+        Parameters
+        ----------
+        filename : str or file-like object
+            A filename to output to. If str, the extension implies the format.
+            If file-like object, pass the desired `format` explicitly.
+            If None, the plot is drawn to a Matplotlib Axes object (can be
+            supplied as `ax` keyword argument).
+
+        **kwargs : optional keyword arguments
+            Passed to ``networkx.draw_networkx()`` (and, optionally,
+            ``matplotlib.figure.Figure.savefig()``).
+        """
+        import networkx as nx
+
+        if filename and not ax:
+            from matplotlib.figure import Figure
+            ax = Figure().add_subplot(111)
+
+        G = nx.MultiDiGraph()
+        G.add_nodes_from(o.name for o in self.object_types)
+
+        ot2count = defaultdict(int)
+        for relation in self.relations:
+            ot1 = relation.row_type
+            ot2 = relation.col_type
+            ot2count[ot1, ot2] += 1
+            if ot1 != ot2:
+                label = (r'$<\mathbf{R}_{%s,%s}^%d>$' %
+                         (ot1.name, ot2.name, ot2count[ot1, ot2]))
+            else:
+                label = (r'$<\mathbf{\Theta}_%s^%d>$' %
+                         (ot1.name, ot2count[ot1, ot2]))
+            G.add_edge(ot1.name, ot2.name, label=label)
+
+        nx.draw_networkx(G, *args,
+                         ax=ax,
+                         node_size=3000,
+                         node_color='white',
+                         **kwargs)
+        edge_labels = {(u, v): d['label'] for u, v, d in G.edges(data=True)}
+        nx.draw_networkx_edge_labels(G, nx.spring_layout(G), edge_labels=edge_labels)
+
+        if filename:
+            ax.figure.savefig(filename, **kwargs)
+        return G
+
     def draw_graphviz(self, filename):
         """Draw the data fusion graph and save it to a file (SVG).
 
