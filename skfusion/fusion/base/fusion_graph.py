@@ -114,6 +114,8 @@ class FusionGraph(object):
         relations = defaultdict(list)
         for rel in self.relations:
             relations[(rel.row_type, rel.col_type)].append(rel)
+        import numpy as np
+        meanweight = np.mean([r.data.shape[0] for rels in relations.values() for r in rels])
         for (ot1, ot2), rels in relations.items():
             if ot1 == ot2:
                 label = '<b>&Theta;</b><font point-size="6">%s</font>' % ot1.name
@@ -124,7 +126,9 @@ class FusionGraph(object):
                     label += ('<br/> <font color="grey">[%dx%d]</font>' %
                               relation.data.shape)
             label = '< ' + label + '>'
-            G.add_edge(ot1.name, ot2.name, label=label)
+            weight = sum(r.data.shape[0] for r in rels)
+            penwidth = 1 * weight / meanweight
+            G.add_edge(ot1.name, ot2.name, label=label, weight=weight, penwidth=penwidth)
 
         if len(args) < 3 and 'prog' not in kwargs:
             kwargs['prog'] = 'dot'
