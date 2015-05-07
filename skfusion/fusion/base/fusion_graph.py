@@ -1,4 +1,4 @@
-from collections import defaultdict, Iterable
+from collections import defaultdict, OrderedDict, Iterable
 
 from .base import DataFusionError
 
@@ -21,8 +21,8 @@ class FusionGraph(object):
     """
     def __init__(self, relations=()):
         self.adjacency_matrix = {}
-        self.relations = []
-        self.object_types = set()
+        self.relations = OrderedDict()
+        self.object_types = OrderedDict()
         self._name2relation = {}
         self._name2object_type = {}
         self.add_relations_from(relations)
@@ -140,11 +140,11 @@ class FusionGraph(object):
         ----------
         relation :
         """
-        self.relations.append(relation)
-        if relation.name != '':
+        self.relations[relation] = True
+        if relation.name:
             self._name2relation[relation.name] = relation
-        self.object_types.add(relation.row_type)
-        self.object_types.add(relation.col_type)
+        self.object_types[relation.row_type] = True
+        self.object_types[relation.col_type] = True
         self._name2object_type[relation.row_type.name] = relation.row_type
         self._name2object_type[relation.col_type.name] = relation.col_type
         neighbors = self.adjacency_matrix.get(relation.row_type, {})
@@ -171,10 +171,10 @@ class FusionGraph(object):
         relation :
         """
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
-        self.relations.remove(relation)
-        if relation.name != '':
+        self.relations.pop(relation)
+        if relation.name:
             self._name2relation.pop(relation.name, None)
-        if self.adjacency_matrix[relation.row_type][relation.col_type] == []:
+        if not self.adjacency_matrix[relation.row_type][relation.col_type]:
             self.adjacency_matrix[relation.row_type].pop(relation.col_type, None)
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
@@ -205,10 +205,9 @@ class FusionGraph(object):
                 self.remove_relation(relation)
         self.adjacency_matrix.pop(object_type, None)
         for obj_type in self.adjacency_matrix:
-            if object_type in self.adjacency_matrix[obj_type]:
-                self.adjacency_matrix[obj_type].pop(object_type, None)
+            self.adjacency_matrix[obj_type].pop(object_type, None)
         self._name2object_type.pop(object_type.name, None)
-        self.object_types.remove(object_type)
+        self.object_types.pop(object_type)
 
     def remove_object_types_from(self, object_types):
         """Remove relations from the fusion graph.
@@ -331,7 +330,9 @@ class FusionGraph(object):
 
     def __repr__(self):
         return "{}(Object types={}, Relations={})".format(
-            self.__class__.__name__, repr(self.object_types), repr(self.relations))
+            self.__class__.__name__,
+            repr(list(self.object_types.keys())),
+            repr(list(self.relations.keys())))
 
 
 class ObjectType(object):
