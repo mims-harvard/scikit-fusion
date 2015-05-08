@@ -188,7 +188,7 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        relations : container of relations
+        relations : container of Relation-s
         """
         for relation in relations:
             self.add_relation(relation)
@@ -219,7 +219,7 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        relations : container of relations
+        relations : container of Relation-s
         """
         for relation in relations:
             self.remove_relation(relation)
@@ -245,7 +245,7 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_types: container of object_types
+        object_types: container of ObjectType-s
         """
         for object_type in object_types:
             self.remove_object_type(object_type)
@@ -255,7 +255,8 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        name : Name of the relation
+        name : str
+            Name of the relation
         """
         if name not in self._name2relation:
             raise DataFusionError("Relation name unknown")
@@ -266,12 +267,12 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        row_type : Object type identifier
-        col_type : Object type identifies
+        row_type : ObjectType
+        col_type : ObjectType
 
         Returns
         -------
-        relation :  an iterator
+        relation :  iterator
         """
         if row_type not in self.object_types or col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
@@ -282,7 +283,8 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        name : Name of the object type
+        name : str
+            Name of the object type
         """
         if name not in self._name2object_type:
             raise DataFusionError("Object type name unknown")
@@ -293,11 +295,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -310,11 +312,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -327,11 +329,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -342,11 +344,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
