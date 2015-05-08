@@ -232,7 +232,7 @@ class FusionGraph(object):
         object_type :
         """
         for relation in self.relations:
-            if object_type == relation.row_type or object_type == relation.col_type:
+            if object_type in relation:
                 self.remove_relation(relation)
         self.adjacency_matrix.pop(object_type, None)
         for obj_type in self.adjacency_matrix:
@@ -412,6 +412,9 @@ class Relation(object):
         self.__dict__.update(kwargs)
         self.__dict__.pop('kwargs', None)
         self.__dict__.pop('self', None)
+
+    def __contains__(self, obj_type):
+        return obj_type == self.row_type or obj_type == self.col_type
 
     def __hash__(self):
         return hash(self.__str__())
