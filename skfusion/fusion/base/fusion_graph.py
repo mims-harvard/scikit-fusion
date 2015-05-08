@@ -21,8 +21,10 @@ class FusionGraph(object):
     """
     def __init__(self, relations=()):
         self.adjacency_matrix = {}
-        self.relations = {}
-        self.object_types = {}
+        self.relations = []
+        self.object_types = set()
+        self._name2relation = {}
+        self._name2object_type = {}
         self.add_relations_from(relations)
 
     @property
@@ -34,7 +36,7 @@ class FusionGraph(object):
         return len(self.object_types)
 
     def __getitem__(self, key):
-        return self.adjacency_matrix[key]
+        return self.adjacency_matrix.get(key, self._name2relation.get(key, None))
 
     def __setitem__(self, key, value):
         self.adjacency_matrix[key] = value
@@ -74,9 +76,13 @@ class FusionGraph(object):
         ----------
         relation :
         """
-        self.relations[relation] = relation
-        self.object_types[relation.row_type] = relation.row_type
-        self.object_types[relation.col_type] = relation.col_type
+        self.relations.append(relation)
+        if relation.name != '':
+            self._name2relation[relation.name] = relation
+        self.object_types.add(relation.row_type)
+        self.object_types.add(relation.col_type)
+        self._name2object_type[relation.row_type.name] = relation.row_type
+        self._name2object_type[relation.col_type.name] = relation.col_type
         neighbors = self.adjacency_matrix.get(relation.row_type, {})
         nbs_list = neighbors.get(relation.col_type, []) + [relation]
         neighbors[relation.col_type] = nbs_list
@@ -101,7 +107,9 @@ class FusionGraph(object):
         relation :
         """
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
-        del self.relations[relation]
+        self.relations.remove(relation)
+        if relation.name != '':
+            del self._name2relation[relation.name]
         if self.adjacency_matrix[relation.row_type][relation.col_type] == []:
             del self.adjacency_matrix[relation.row_type][relation.col_type]
         if not list(self.in_neighbors(relation.row_type)) and \
@@ -135,7 +143,8 @@ class FusionGraph(object):
         for obj_type in self.adjacency_matrix:
             if object_type in self.adjacency_matrix[obj_type]:
                 del self.adjacency_matrix[obj_type][object_type]
-        del self.object_types[object_type]
+        del self._name2object_type[object_type.name]
+        self.object_types.remove(object_type)
 
     def remove_object_types_from(self, object_types):
         """Remove relations from the fusion graph.
@@ -147,7 +156,18 @@ class FusionGraph(object):
         for object_type in object_types:
             self.remove_object_type(object_type)
 
-    def get_relations(self, row_type, col_type=None):
+    def get_relation(self, name):
+        """Return a relation matrix with a given name.
+
+        Parameters
+        ----------
+        name : Name of the relation
+        """
+        if name not in self._name2relation:
+            raise DataFusionError("Relation name unknown")
+        return self._name2relation[name]
+
+    def get_relations(self, row_type, col_type):
         """Return an iterator for relation matrices between two types of objects.
 
         Parameters
@@ -159,9 +179,7 @@ class FusionGraph(object):
         -------
         relation :  an iterator
         """
-        if row_type not in self.object_types:
-            raise DataFusionError("Object types are not recognized.")
-        if col_type is not None and col_type not in self.object_types:
+        if row_type not in self.object_types or col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
         return iter(self.adjacency_matrix.get(row_type, {}).get(col_type, []))
 
@@ -170,11 +188,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        name :
+        name : Name of the object type
         """
-        object_types = [obj_type for obj_type in self.object_types
-                       if obj_type.name == name]
-        return object_types if len(object_types) != 1 else object_types[0]
+        if name not in self._name2object_type:
+            raise DataFusionError("Object type name unknown")
+        return self._name2object_type[name]
 
     def out_relations(self, object_type):
         """Return an iterator for relations adjacent to the object type.
@@ -249,8 +267,7 @@ class FusionGraph(object):
 
     def __repr__(self):
         return "{}(Object types={}, Relations={})".format(
-            self.__class__.__name__, repr(list(self.object_types.values())),
-            repr(list(self.relations.values())))
+            self.__class__.__name__, repr(self.object_types), repr(self.relations))
 
 
 class ObjectType(object):
@@ -289,11 +306,12 @@ class Relation(object):
     data :
     row_type :
     col_type :
+    name :
     mask :
     row_names :
     col_names :
     """
-    def __init__(self, data, row_type, col_type, mask=None,
+    def __init__(self, data, row_type, col_type, name='', mask=None,
                  row_names=None, col_names=None, **kwargs):
         self.__dict__.update(vars())
         self.__dict__.update(kwargs)
@@ -304,9 +322,11 @@ class Relation(object):
         return hash(self.__str__())
 
     def __str__(self):
-        return "{}({}, {})".format(
-            self.__class__.__name__, str(self.row_type), str(self.col_type))
+        return "{}({}, {}): name=\"{}\"".format(
+            self.__class__.__name__, str(self.row_type),
+            str(self.col_type), str(self.name))
 
     def __repr__(self):
-        return "{}({}, {})".format(
-            self.__class__.__name__, repr(self.row_type), repr(self.col_type))
+        return "{}({}, {}): name=\"{}\"".format(
+            self.__class__.__name__, repr(self.row_type),
+            repr(self.col_type), str(self.name))

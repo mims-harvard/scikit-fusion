@@ -47,12 +47,15 @@ def load_dicty():
     exprc = ObjectType('Experimental condition', 5)
 
     data, rn, cn = load_source(join('dicty', 'dicty.gene_annnotations.csv.gz'))
-    ann = Relation(data=data, row_type=gene, col_type=go_term, row_names=rn, col_names=cn)
+    ann = Relation(data=data, row_type=gene, col_type=go_term, name='ann',
+                   row_names=rn, col_names=cn)
     data, rn, cn = load_source(join('dicty', 'dicty.gene_expression.csv.gz'))
-    expr = Relation(data=data, row_type=gene, col_type=exprc, row_names=rn, col_names=cn)
+    expr = Relation(data=data, row_type=gene, col_type=exprc, name='expr',
+                    row_names=rn, col_names=cn)
     expr.data = np.log(np.maximum(expr.data, np.finfo(np.float).eps))
     data, rn, cn = load_source(join('dicty', 'dicty.ppi.csv.gz'))
-    ppi = Relation(data=data, row_type=gene, col_type=gene, row_names=rn, col_names=cn)
+    ppi = Relation(data=data, row_type=gene, col_type=gene, name='ppi',
+                   row_names=rn, col_names=cn)
 
     return FusionGraph([ann, expr, ppi])
 

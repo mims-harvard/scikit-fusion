@@ -14,17 +14,17 @@ class TestFusionGraph(unittest.TestCase):
         self.t3 = ObjectType('Type 3', 10)
         self.t4 = ObjectType('Type 4', 10)
         self.t5 = ObjectType('Type 5', 10)
-        self. relations1 = [
-            Relation(X, self.t1, self.t2), Relation(X, self.t2, self.t3),
+        self.relations1 = [
+            Relation(X, self.t1, self.t2, name='Test1'), Relation(X, self.t2, self.t3),
             Relation(X, self.t3, self.t4), Relation(X, self.t4, self.t5),
             Relation(X, self.t3, self.t5), Relation(X, self.t5, self.t1)]
 
         self.relations2 = [
-            Relation(X, self.t1, self.t2), Relation(X, self.t1, self.t2),
+            Relation(X, self.t1, self.t2, name='Test2'), Relation(X, self.t1, self.t2),
             Relation(X, self.t2, self.t3), Relation(X, self.t3, self.t4),
             Relation(X, self.t4, self.t5), Relation(X, self.t3, self.t5),
             Relation(X, self.t5, self.t1), Relation(X, self.t4, self.t4),
-            Relation(X, self.t4, self.t4), Relation(X, self.t5, self.t5)]
+            Relation(X, self.t4, self.t4, name='Test3'), Relation(X, self.t5, self.t5)]
 
     def test_drawing(self):
         fusion_graph = FusionGraph()
@@ -34,6 +34,9 @@ class TestFusionGraph(unittest.TestCase):
     def test_manipulation(self):
         fusion_graph = FusionGraph()
         fusion_graph.add_relations_from(self.relations2)
+
+        self.assertEqual(fusion_graph['Test2'], self.relations2[0])
+        self.assertEqual(fusion_graph['Test3'], self.relations2[8])
 
         self.assertEqual(fusion_graph.n_object_types, 5)
         self.assertEqual(fusion_graph.n_relations, 10)
