@@ -1,4 +1,5 @@
 from itertools import product
+from collections import defaultdict
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -60,7 +61,7 @@ class Dfmc(FusionFit):
         """
         self.fusion_graph = fusion_graph
         if not isinstance(self.random_state, np.random.RandomState):
-            self.random_state = np.random.RandomState(self.random_state)
+            self.random_state = np.random.RandomState(0)
 
         object_types = set([ot for ot in self.fusion_graph.object_types])
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
@@ -91,6 +92,8 @@ class Dfmc(FusionFit):
                      for _ in range(self.n_run))
         entries = parallelizer(task_iter)
 
+        self.factors_ = defaultdict(list)
+        self.backbones_ = defaultdict(list)
         for G, S in entries:
             for (object_type, _), factor in G.items():
                 self.factors_[object_type].append(factor)

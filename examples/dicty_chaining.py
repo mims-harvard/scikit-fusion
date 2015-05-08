@@ -84,9 +84,9 @@ def main():
         if cls_size > n_genes - 20 or cls_size < 20:
             continue
 
-        skf = cross_validation.StratifiedKFold(y_true, n_folds=n_folds)
+        cv = cross_validation.StratifiedKFold(y_true, n_folds=n_folds)
         y_pred = np.zeros_like(y_true)
-        for i, (train_idx, test_idx) in enumerate(skf):
+        for i, (train_idx, test_idx) in enumerate(cv):
             y_pred[test_idx] = predict_term(train_idx, test_idx, term_idx)
 
         term_auc = metrics.roc_auc_score(y_true, y_pred)

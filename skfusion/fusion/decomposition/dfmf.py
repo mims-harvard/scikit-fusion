@@ -1,4 +1,5 @@
 from itertools import product
+from collections import defaultdict
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -82,6 +83,8 @@ class Dfmf(FusionFit):
                      for _ in range(self.n_run))
         entries = parallelizer(task_iter)
 
+        self.factors_ = defaultdict(list)
+        self.backbones_ = defaultdict(list)
         for G, S in entries:
             for (object_type, _), factor in G.items():
                 self.factors_[object_type].append(factor)
@@ -174,6 +177,7 @@ class DfmfTransform(FusionTransform):
                      for run in range(self.n_run))
         entries = parallelizer(task_iter)
 
+        self.factors_ = defaultdict(list)
         for G_new in entries:
             self.factors_[self.target].append(G_new)
         return self
