@@ -303,7 +303,7 @@ class FusionGraph(object):
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
-        for col_type in self.adjacency_matrix[object_type]:
+        for col_type in self.adjacency_matrix.get(object_type, {}):
             for relation in self.adjacency_matrix[object_type][col_type]:
                 yield relation
 
