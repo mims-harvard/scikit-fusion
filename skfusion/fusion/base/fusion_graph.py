@@ -1,5 +1,7 @@
 from collections import defaultdict, OrderedDict, Iterable
 
+import numpy as np
+
 from .base import DataFusionError
 
 
@@ -95,39 +97,68 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        verbose_edges : bool, optional
-            Annote edge labels with relations' matrix shape information.
+        graph_attr : dict
+            Dict of Graphviz graph attributes
+        node_attr : dict
+            Dict of Graphviz node attributes
+        edge_attr : dict
+            Dict of Graphviz edge attributes
 
         *args, **kwargs : optional
             Passed to `pygraphviz.AGraph.draw()` method.
         """
-        verbose_edges = kwargs.pop('verbose_edges', False)
         import pygraphviz as pgv
         G = pgv.AGraph(strict=False, directed=True)
-        G.node_attr['fontsize'] = 11
-        G.edge_attr['fontsize'] = 9
-        G.node_attr['fontname'] = \
-        G.edge_attr['fontname'] = 'sans-serif'
+        # From http://graphviz.org/content/attrs
+        G.graph_attr.update({
+            'outputorder': 'edgesfirst',
+            'packmode': 'graph',
+            'pad': .3,
+        }, **kwargs.pop('graph_attr', {}))
+        G.node_attr.update({
+            'fontsize': 11,
+            'fontname': 'sans-serif',
+            'fillcolor': 'white',
+            'style': 'filled',
+        }, **kwargs.pop('node_attr', {}))
+        G.edge_attr.update({
+            'fontsize': 9,
+            'fontname': 'sans-serif',
+        }, **kwargs.pop('edge_attr', {}))
 
-        G.add_nodes_from(o.name for o in self.object_types)
-
+        n_objects = {}
+        for ot in self.object_types:
+            # The maximum number of objects of this type featured in any of the
+            # relations
+            n = max(max([rel.data.shape[0] for rel in self.out_relations(ot)], default=0),
+                    max([rel.data.shape[1] for rel in self.in_relations(ot)],  default=0))
+            n_objects[ot] = n
+            G.add_node(ot.name,
+                       # This is relied upon by biolab/orange3; if you change this id,
+                       # please let them know:
+                       id='node `%s`' % ot.name,
+                       label='<%s<br/><font color="grey">(%d)</font>>' % (ot.name, n))
         relations = defaultdict(list)
         for rel in self.relations:
             relations[(rel.row_type, rel.col_type)].append(rel)
-        meanweight = sum(len(rels) for rels in relations.values()) / self.n_relations
         for (ot1, ot2), rels in relations.items():
-            if ot1 == ot2:
-                label = '<b>&Theta;</b><font point-size="6">%s</font>' % ot1.name
-            else:
-                label = '<b>R</b><font point-size="6">%s,%s</font>' % (ot1.name, ot2.name)
-            if verbose_edges:
-                for relation in rels:
-                    label += ('<br/> <font color="grey">[%dx%d]</font>' %
-                              relation.data.shape)
-            label = '< ' + label + '>'
-            weight = len(rels)
-            penwidth = 1 * weight / meanweight
-            G.add_edge(ot1.name, ot2.name, label=label, penwidth=penwidth)
+            label = (',<br/>&nbsp;'.join(rel.name for rel in rels if rel.name) or
+                     '<b>%s</b>' % ('R' if ot1 != ot2 else '&Theta;'))
+            label = '<&nbsp;' + label + '>'
+            tooltip = ', '.join('[%d×%d]' % rel.data.shape for rel in rels)
+            # Penwidth is normalized as the sum of relations' (defined) areas
+            # divided by the largest possible area of the given two object types
+            weight = sum(np.ma.count(rel.data) / n_objects[ot1] / n_objects[ot2]
+                         for rel in rels)
+            penwidth = np.clip(1.3 * weight, .5, 3)
+            G.add_edge(ot1.name, ot2.name,
+                       # This is relied upon by biolab/orange3; if you change this id,
+                       # please let them know
+                       id='edge `%s`->`%s`' % (ot1.name, ot2.name),
+                       label=label,
+                       tooltip=tooltip,
+                       labelaligned=True,  # http://www.graphviz.org/content/allign-edge-labels-fit-its-path-svg-output
+                       penwidth=penwidth)
 
         if len(args) < 3 and 'prog' not in kwargs:
             kwargs['prog'] = 'dot'
