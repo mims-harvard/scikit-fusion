@@ -388,10 +388,10 @@ class ObjectType(object):
         return self.name != other
 
     def __str__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
+        return self.name
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
+        return '{}("{}")'.format(self.__class__.__name__, self.name)
 
 
 class Relation(object):
@@ -420,11 +420,11 @@ class Relation(object):
         return hash(self.__str__())
 
     def __str__(self):
-        return "{}({}, {}): name=\"{}\"".format(
-            self.__class__.__name__, str(self.row_type),
-            str(self.col_type), str(self.name))
+        return self.__repr__(str)
 
-    def __repr__(self):
-        return "{}({}, {}): name=\"{}\"".format(
-            self.__class__.__name__, repr(self.row_type),
-            repr(self.col_type), str(self.name))
+    def __repr__(self, repr=repr):
+        return "{}({} {} {})".format(
+            self.__class__.__name__,
+            repr(self.row_type),
+            ('"%s"' % self.name) if self.name else "→",
+            repr(self.col_type))
