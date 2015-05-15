@@ -158,9 +158,9 @@ class FusionGraph(object):
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
         self.relations.remove(relation)
         if relation.name != '':
-            del self._name2relation[relation.name]
+            self._name2relation.pop(relation.name, None)
         if self.adjacency_matrix[relation.row_type][relation.col_type] == []:
-            del self.adjacency_matrix[relation.row_type][relation.col_type]
+            self.adjacency_matrix[relation.row_type].pop(relation.col_type, None)
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
             self.remove_object_type(relation.row_type)
@@ -188,11 +188,11 @@ class FusionGraph(object):
         for relation in self.relations:
             if object_type == relation.row_type or object_type == relation.col_type:
                 self.remove_relation(relation)
-        del self.adjacency_matrix[object_type]
+        self.adjacency_matrix.pop(object_type, None)
         for obj_type in self.adjacency_matrix:
             if object_type in self.adjacency_matrix[obj_type]:
-                del self.adjacency_matrix[obj_type][object_type]
-        del self._name2object_type[object_type.name]
+                self.adjacency_matrix[obj_type].pop(object_type, None)
+        self._name2object_type.pop(object_type.name, None)
         self.object_types.remove(object_type)
 
     def remove_object_types_from(self, object_types):
@@ -364,8 +364,8 @@ class Relation(object):
                  row_names=None, col_names=None, **kwargs):
         self.__dict__.update(vars())
         self.__dict__.update(kwargs)
-        del self.__dict__['kwargs']
-        del self.__dict__['self']
+        self.__dict__.pop('kwargs', None)
+        self.__dict__.pop('self', None)
 
     def __hash__(self):
         return hash(self.__str__())

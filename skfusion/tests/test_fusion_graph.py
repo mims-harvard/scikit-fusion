@@ -66,6 +66,14 @@ class TestFusionGraph(unittest.TestCase):
         out_degree2 = sum(len(rels) for rels in fusion_graph[self.t4].values())
         self.assertEqual(out_degree1, out_degree2)
 
+    def test_removal_single_relation(self):
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(self.relations1[0])
+        self.assertEqual(fusion_graph.n_relations, 1)
+        self.assertEqual(fusion_graph.n_object_types, 2)
+        fusion_graph.remove_relation(self.relations1[0])
+        self.assertEqual(fusion_graph.n_relations, 0)
+        self.assertEqual(fusion_graph.n_object_types, 0)
 
 if __name__ == "__main__":
     unittest.main()
