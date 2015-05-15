@@ -69,18 +69,20 @@ class Dfmc(FusionFit):
         R, T, M = {}, {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
+                data = relation.data.data if np.ma.is_masked(relation.data) else relation.data
+                mask = relation.data.mask if np.ma.is_masked(relation.data) else None
                 if relation.row_type != relation.col_type:
                     R[relation.row_type, relation.col_type] = R.get((
                         relation.row_type, relation.col_type), [])
-                    R[relation.row_type, relation.col_type].append(relation.data)
+                    R[relation.row_type, relation.col_type].append(data)
 
                     M[relation.row_type, relation.col_type] = M.get((
                         relation.row_type, relation.col_type), [])
-                    M[relation.row_type, relation.col_type].append(relation.mask)
+                    M[relation.row_type, relation.col_type].append(mask)
                 else:
                     T[relation.row_type, relation.col_type] = T.get((
                         relation.row_type, relation.col_type), [])
-                    T[relation.row_type, relation.col_type].append(relation.data)
+                    T[relation.row_type, relation.col_type].append(data)
 
         parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmc_wrapper)(

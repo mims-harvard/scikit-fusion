@@ -356,11 +356,10 @@ class Relation(object):
     row_type :
     col_type :
     name :
-    mask :
     row_names :
     col_names :
     """
-    def __init__(self, data, row_type, col_type, name='', mask=None,
+    def __init__(self, data, row_type, col_type, name='',
                  row_names=None, col_names=None, **kwargs):
         self.__dict__.update(vars())
         self.__dict__.update(kwargs)
