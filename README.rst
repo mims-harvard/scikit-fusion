@@ -42,7 +42,7 @@ Usage
 
 Let's generate three random data matrices describing three different object types::
 
-     >>> import numpy as npw
+     >>> import numpy as np
      >>> R12 = np.random.rand(50, 100)
      >>> R13 = np.random.rand(50, 40)
      >>> R23 = np.random.rand(100, 40)
@@ -54,9 +54,10 @@ Next, we define our data fusion graph::
      >>> t2 = fusion.ObjectType('Type 2', 20)
      >>> t3 = fusion.ObjectType('Type 3', 30)
      >>> relations = [fusion.Relation(R12, t1, t2),
-            fusion.Relation(R13, t1, t3), fusion.Relation(R23, t2, t3)]
+                      fusion.Relation(R13, t1, t3),
+                      fusion.Relation(R23, t2, t3)]
      >>> fusion_graph = fusion.FusionGraph()
-     >>> fusion_graph.add(relations)
+     >>> fusion_graph.add_relations_from(relations)
 
 and then collectively infer the latent data model::
 
@@ -74,7 +75,7 @@ Afterwards new data might arrive::
 for which we define the fusion graph::
 
      >>> new_relations = [fusion.Relation(new_R12, t1, t2),
-            fusion.Relation(new_R13, t1, t3)]
+                          fusion.Relation(new_R13, t1, t3)]
      >>> new_graph = fusion.FusionGraph(new_relations)
 
 and transform new objects to the latent space induced by the ``fuser``::
@@ -86,7 +87,7 @@ and transform new objects to the latent space induced by the ``fuser``::
 
 ****
 
-scikit-fusion is distributed with few working data fusion scenarios::
+scikit-fusion is distributed with a few working data fusion scenarios::
 
     >>> from skfusion import datasets
     >>> dicty = datasets.load_dicty()
@@ -96,8 +97,8 @@ scikit-fusion is distributed with few working data fusion scenarios::
     {ObjectType(GO term), ObjectType(Experimental condition), ObjectType(Gene)}
     >>> print(dicty.relations)
     {Relation(ObjectType(Gene), ObjectType(GO term)),
-        Relation(ObjectType(Gene), ObjectType(Gene)),
-        Relation(ObjectType(Gene), ObjectType(Experimental condition))}
+     Relation(ObjectType(Gene), ObjectType(Gene)),
+     Relation(ObjectType(Gene), ObjectType(Experimental condition))}
 
 Relevant links
 ==============

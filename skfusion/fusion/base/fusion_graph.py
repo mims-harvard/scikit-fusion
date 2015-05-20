@@ -1,4 +1,6 @@
-from collections import defaultdict, Iterable
+from collections import defaultdict, OrderedDict, Iterable
+
+import numpy as np
 
 from .base import DataFusionError
 
@@ -21,8 +23,8 @@ class FusionGraph(object):
     """
     def __init__(self, relations=()):
         self.adjacency_matrix = {}
-        self.relations = []
-        self.object_types = set()
+        self.relations = OrderedDict()
+        self.object_types = OrderedDict()
         self._name2relation = {}
         self._name2object_type = {}
         self.add_relations_from(relations)
@@ -90,33 +92,77 @@ class FusionGraph(object):
             ax.figure.savefig(filename, **kwargs)
         return G
 
-    def draw_graphviz(self, filename):
-        """Draw the data fusion graph and save it to a file (SVG).
+    def draw_graphviz(self, *args, **kwargs):
+        """Draw the data fusion graph using PyGraphviz and save it to a file.
 
         Parameters
         ----------
-        filename :
+        graph_attr : dict
+            Dict of Graphviz graph attributes
+        node_attr : dict
+            Dict of Graphviz node attributes
+        edge_attr : dict
+            Dict of Graphviz edge attributes
+
+        *args, **kwargs : optional
+            Passed to `pygraphviz.AGraph.draw()` method.
         """
         import pygraphviz as pgv
-        fus_graph = pgv.AGraph(strict=False, directed=True)
-        # object types
+        G = pgv.AGraph(strict=False, directed=True)
+        # From http://graphviz.org/content/attrs
+        G.graph_attr.update({
+            'outputorder': 'edgesfirst',
+            'packmode': 'graph',
+            'pad': .3,
+        }, **kwargs.pop('graph_attr', {}))
+        G.node_attr.update({
+            'fontsize': 11,
+            'fontname': 'sans-serif',
+            'fillcolor': 'white',
+            'style': 'filled',
+        }, **kwargs.pop('node_attr', {}))
+        G.edge_attr.update({
+            'fontsize': 9,
+            'fontname': 'sans-serif',
+        }, **kwargs.pop('edge_attr', {}))
+
+        n_objects = {}
         for ot in self.object_types:
-            fus_graph.add_node(ot.name)
-        # relations
-        ot2count = defaultdict(int)
-        for relation in self.relations:
-            ot1 = relation.row_type
-            ot2 = relation.col_type
-            ot2count[ot1, ot2] += 1
-            if ot1 != ot2:
-                label = '<<b>R</b><SUB>%s,%s</SUB><SUP>%d</SUP>' \
-                        '<br/>>' % (ot1.name, ot2.name, ot2count[ot1, ot2])
-                fus_graph.add_edge(ot1.name, ot2.name, text=label)
-            else:
-                label = '<<b>&Theta;</b><SUB>%s</SUB>' \
-                        '<SUP>%d</SUP><br/>>' % (ot1.name, ot2count[ot1, ot2])
-                fus_graph.add_edge(ot1.name, ot1.name, label=label)
-        fus_graph.draw(filename, format='pdf', prog='dot')
+            # The maximum number of objects of this type featured in any of the
+            # relations
+            n = max(max([rel.data.shape[0] for rel in self.out_relations(ot)], default=0),
+                    max([rel.data.shape[1] for rel in self.in_relations(ot)],  default=0))
+            n_objects[ot] = n
+            G.add_node(ot.name,
+                       # This is relied upon by biolab/orange3; if you change this id,
+                       # please let them know:
+                       id='node `%s`' % ot.name,
+                       label='<%s<br/><font color="grey">(%d)</font>>' % (ot.name, n))
+        relations = defaultdict(list)
+        for rel in self.relations:
+            relations[(rel.row_type, rel.col_type)].append(rel)
+        for (ot1, ot2), rels in relations.items():
+            label = (',<br/>&nbsp;'.join(rel.name for rel in rels if rel.name) or
+                     '<b>%s</b>' % ('R' if ot1 != ot2 else '&Theta;'))
+            label = '<&nbsp;' + label + '>'
+            tooltip = ', '.join('[%d×%d]' % rel.data.shape for rel in rels)
+            # Penwidth is normalized as the sum of relations' (defined) areas
+            # divided by the largest possible area of the given two object types
+            weight = sum(np.ma.count(rel.data) / n_objects[ot1] / n_objects[ot2]
+                         for rel in rels)
+            penwidth = np.clip(1.3 * weight, .5, 3)
+            G.add_edge(ot1.name, ot2.name,
+                       # This is relied upon by biolab/orange3; if you change this id,
+                       # please let them know
+                       id='edge `%s`->`%s`' % (ot1.name, ot2.name),
+                       label=label,
+                       tooltip=tooltip,
+                       labelaligned=True,  # http://www.graphviz.org/content/allign-edge-labels-fit-its-path-svg-output
+                       penwidth=penwidth)
+
+        if len(args) < 3 and 'prog' not in kwargs:
+            kwargs['prog'] = 'dot'
+        G.draw(*args, **kwargs)
 
     def add_relation(self, relation):
         """Add a single relation to the fusion graph.
@@ -125,11 +171,11 @@ class FusionGraph(object):
         ----------
         relation :
         """
-        self.relations.append(relation)
-        if relation.name != '':
+        self.relations[relation] = True
+        if relation.name:
             self._name2relation[relation.name] = relation
-        self.object_types.add(relation.row_type)
-        self.object_types.add(relation.col_type)
+        self.object_types[relation.row_type] = True
+        self.object_types[relation.col_type] = True
         self._name2object_type[relation.row_type.name] = relation.row_type
         self._name2object_type[relation.col_type.name] = relation.col_type
         neighbors = self.adjacency_matrix.get(relation.row_type, {})
@@ -142,7 +188,7 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        relations : container of relations
+        relations : container of Relation-s
         """
         for relation in relations:
             self.add_relation(relation)
@@ -156,10 +202,10 @@ class FusionGraph(object):
         relation :
         """
         self.adjacency_matrix[relation.row_type][relation.col_type].remove(relation)
-        self.relations.remove(relation)
-        if relation.name != '':
+        self.relations.pop(relation)
+        if relation.name:
             self._name2relation.pop(relation.name, None)
-        if self.adjacency_matrix[relation.row_type][relation.col_type] == []:
+        if not self.adjacency_matrix[relation.row_type][relation.col_type]:
             self.adjacency_matrix[relation.row_type].pop(relation.col_type, None)
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
@@ -173,7 +219,7 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        relations : container of relations
+        relations : container of Relation-s
         """
         for relation in relations:
             self.remove_relation(relation)
@@ -186,21 +232,20 @@ class FusionGraph(object):
         object_type :
         """
         for relation in self.relations:
-            if object_type == relation.row_type or object_type == relation.col_type:
+            if object_type in relation:
                 self.remove_relation(relation)
         self.adjacency_matrix.pop(object_type, None)
         for obj_type in self.adjacency_matrix:
-            if object_type in self.adjacency_matrix[obj_type]:
-                self.adjacency_matrix[obj_type].pop(object_type, None)
+            self.adjacency_matrix[obj_type].pop(object_type, None)
         self._name2object_type.pop(object_type.name, None)
-        self.object_types.remove(object_type)
+        self.object_types.pop(object_type)
 
     def remove_object_types_from(self, object_types):
         """Remove relations from the fusion graph.
 
         Parameters
         ----------
-        object_types: container of object_types
+        object_types: container of ObjectType-s
         """
         for object_type in object_types:
             self.remove_object_type(object_type)
@@ -210,7 +255,8 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        name : Name of the relation
+        name : str
+            Name of the relation
         """
         if name not in self._name2relation:
             raise DataFusionError("Relation name unknown")
@@ -221,12 +267,12 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        row_type : Object type identifier
-        col_type : Object type identifies
+        row_type : ObjectType
+        col_type : ObjectType
 
         Returns
         -------
-        relation :  an iterator
+        relation :  iterator
         """
         if row_type not in self.object_types or col_type not in self.object_types:
             raise DataFusionError("Object types are not recognized.")
@@ -237,7 +283,8 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        name : Name of the object type
+        name : str
+            Name of the object type
         """
         if name not in self._name2object_type:
             raise DataFusionError("Object type name unknown")
@@ -248,15 +295,15 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
-        for col_type in self.adjacency_matrix[object_type]:
+        for col_type in self.adjacency_matrix.get(object_type, {}):
             for relation in self.adjacency_matrix[object_type][col_type]:
                 yield relation
 
@@ -265,11 +312,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -282,11 +329,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -297,11 +344,11 @@ class FusionGraph(object):
 
         Parameters
         ----------
-        object_type : Object type identifier
+        object_type : ObjectType
 
         Returns
         -------
-        relation : an iterator
+        relation : iterator
         """
         if object_type not in self.object_types:
             raise DataFusionError("Object type not in the fusion graph.")
@@ -316,7 +363,9 @@ class FusionGraph(object):
 
     def __repr__(self):
         return "{}(Object types={}, Relations={})".format(
-            self.__class__.__name__, repr(self.object_types), repr(self.relations))
+            self.__class__.__name__,
+            repr(list(self.object_types.keys())),
+            repr(list(self.relations.keys())))
 
 
 class ObjectType(object):
@@ -341,10 +390,10 @@ class ObjectType(object):
         return self.name != other
 
     def __str__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
+        return self.name
 
     def __repr__(self):
-        return "{}(\"{}\")".format(self.__class__.__name__, self.name)
+        return '{}("{}")'.format(self.__class__.__name__, self.name)
 
 
 class Relation(object):
@@ -366,15 +415,18 @@ class Relation(object):
         self.__dict__.pop('kwargs', None)
         self.__dict__.pop('self', None)
 
+    def __contains__(self, obj_type):
+        return obj_type == self.row_type or obj_type == self.col_type
+
     def __hash__(self):
         return hash(self.__str__())
 
     def __str__(self):
-        return "{}({}, {}): name=\"{}\"".format(
-            self.__class__.__name__, str(self.row_type),
-            str(self.col_type), str(self.name))
+        return self.__repr__(str)
 
-    def __repr__(self):
-        return "{}({}, {}): name=\"{}\"".format(
-            self.__class__.__name__, repr(self.row_type),
-            repr(self.col_type), str(self.name))
+    def __repr__(self, repr=repr):
+        return "{}({} {} {})".format(
+            self.__class__.__name__,
+            repr(self.row_type),
+            ('"%s"' % self.name) if self.name else "→",
+            repr(self.col_type))
