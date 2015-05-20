@@ -68,7 +68,7 @@ class Dfmf(FusionFit):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                data = relation.data.data if np.ma.is_masked(relation.data) else relation.data
+                data = relation.data.filled() if np.ma.is_masked(relation.data) else relation.data
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
@@ -163,10 +163,11 @@ class DfmfTransform(FusionTransform):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
+                data = relation.data.filled() if np.ma.is_masked(relation.data) else relation.data
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
-                X[relation.row_type, relation.col_type].append(relation.data)
+                X[relation.row_type, relation.col_type].append(data)
 
         parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmf_transform_wrapper)(
