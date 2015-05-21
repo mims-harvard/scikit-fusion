@@ -26,6 +26,7 @@ class Dfmf(FusionFit):
     n_run :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     callback :
@@ -39,6 +40,7 @@ class Dfmf(FusionFit):
     n_run :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     callback :
@@ -46,7 +48,7 @@ class Dfmf(FusionFit):
     n_jobs :
     """
     def __init__(self, max_iter=100, init_type='random_c', n_run=1,
-                 stopping=None, stopping_system=None, verbose=0,
+                 stopping=None, stopping_system=None, fill_value=0, verbose=0,
                  compute_err=False, callback=None, random_state=None, n_jobs=1):
         super(Dfmf, self).__init__()
         self._set_params(vars())
@@ -68,7 +70,11 @@ class Dfmf(FusionFit):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                data = relation.data.filled() if np.ma.is_masked(relation.data) else relation.data
+                if np.ma.is_masked(relation.data):
+                    relation.data.fill_value = self.fill_value
+                    data = relation.data.filled()
+                else:
+                    data = relation.data
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
@@ -117,6 +123,7 @@ class DfmfTransform(FusionTransform):
     init_type :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     random_state :
@@ -129,13 +136,14 @@ class DfmfTransform(FusionTransform):
     init_type :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     random_state :
     n_jobs :
     """
     def __init__(self, max_iter=100, init_type=None, n_run=1, stopping=None,
-                 stopping_system=None, verbose=0, compute_err=False,
+                 stopping_system=None, fill_value=0, verbose=0, compute_err=False,
                  random_state=None, n_jobs=1):
         super(DfmfTransform, self).__init__()
         self._set_params(vars())
@@ -163,7 +171,11 @@ class DfmfTransform(FusionTransform):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                data = relation.data.filled() if np.ma.is_masked(relation.data) else relation.data
+                if np.ma.is_masked(relation.data):
+                    relation.data.fill_value = self.fill_value
+                    data = relation.data.filled()
+                else:
+                    data = relation.data
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
