@@ -384,10 +384,10 @@ class ObjectType(object):
         return hash(self.__str__())
 
     def __eq__(self, other):
-        return self.name == other
+        return isinstance(other, self.__class__) and self.name == other.name
 
     def __ne__(self, other):
-        return self.name != other
+        return not self == other
 
     def __str__(self):
         return self.name
@@ -420,6 +420,16 @@ class Relation(object):
 
     def __hash__(self):
         return hash(self.__str__())
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__) and
+                self.name == other.name and
+                self.row_type == other.row_type and
+                self.col_type == other.col_type and
+                self.data.shape == other.data.shape)
+
+    def __ne__(self, other):
+        return not self == other
 
     def __str__(self):
         return self.__repr__(str)
