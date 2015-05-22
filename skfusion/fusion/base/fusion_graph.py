@@ -1,4 +1,5 @@
 from collections import defaultdict, OrderedDict, Iterable
+from uuid import uuid1 as uuid
 
 import numpy as np
 
@@ -384,10 +385,10 @@ class ObjectType(object):
         return hash(self.__str__())
 
     def __eq__(self, other):
-        return self.name == other
+        return isinstance(other, self.__class__) and self.name == other.name
 
     def __ne__(self, other):
-        return self.name != other
+        return not self == other
 
     def __str__(self):
         return self.name
@@ -410,16 +411,23 @@ class Relation(object):
     """
     def __init__(self, data, row_type, col_type, name='',
                  row_names=None, col_names=None, **kwargs):
-        self.__dict__.update(vars())
+        self.__dict__.update(locals())
         self.__dict__.update(kwargs)
         self.__dict__.pop('kwargs', None)
         self.__dict__.pop('self', None)
+        self._id = name or uuid()
 
     def __contains__(self, obj_type):
         return obj_type == self.row_type or obj_type == self.col_type
 
     def __hash__(self):
         return hash(self.__str__())
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self._id == other._id
+
+    def __ne__(self, other):
+        return not self == other
 
     def __str__(self):
         return self.__repr__(str)
