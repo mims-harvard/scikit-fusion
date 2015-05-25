@@ -61,7 +61,7 @@ class Dfmc(FusionFit):
         """
         self.fusion_graph = fusion_graph
         if not isinstance(self.random_state, np.random.RandomState):
-            self.random_state = np.random.RandomState(0)
+            self.random_state = np.random.RandomState(self.random_state)
 
         object_types = set([ot for ot in self.fusion_graph.object_types])
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
