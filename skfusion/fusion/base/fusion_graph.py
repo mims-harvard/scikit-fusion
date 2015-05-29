@@ -164,6 +164,8 @@ class FusionGraph(object):
         if not list(self.in_neighbors(relation.row_type)) and \
                 not list(self.out_neighbors(relation.row_type)):
             self.remove_object_type(relation.row_type)
+            if relation.row_type == relation.col_type:
+                return
         if not list(self.in_neighbors(relation.col_type)) and \
                 not list(self.out_neighbors(relation.col_type)):
             self.remove_object_type(relation.col_type)

@@ -75,5 +75,14 @@ class TestFusionGraph(unittest.TestCase):
         self.assertEqual(fusion_graph.n_relations, 0)
         self.assertEqual(fusion_graph.n_object_types, 0)
 
+    def test_removal_of_loops(self):
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(self.relations2[-1])
+        self.assertEqual(fusion_graph.n_relations, 1)
+        self.assertEqual(fusion_graph.n_object_types, 1)
+        fusion_graph.remove_relation(self.relations2[-1])
+        self.assertEqual(fusion_graph.n_relations, 0)
+        self.assertEqual(fusion_graph.n_object_types, 0)
+
 if __name__ == "__main__":
     unittest.main()
