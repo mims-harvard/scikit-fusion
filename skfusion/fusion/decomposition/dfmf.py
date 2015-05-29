@@ -144,7 +144,7 @@ class DfmfTransform(FusionTransform):
     """
     def __init__(self, max_iter=100, init_type=None, n_run=1, stopping=None,
                  stopping_system=None, fill_value=0, verbose=0, compute_err=False,
-                 random_state=None, n_jobs=1):
+                 callback=None, random_state=None, n_jobs=1):
         super(DfmfTransform, self).__init__()
         self._set_params(vars())
 
@@ -187,7 +187,7 @@ class DfmfTransform(FusionTransform):
             R_ij=R, Theta_i=T, target_obj_type=self.target,
             obj_type2rank=object_type2rank, max_iter=self.max_iter, init_type=init_type,
             stopping=self.stopping, stopping_system=self.stopping_system, verbose=self.verbose,
-            compute_err=self.compute_err, random_state=self.random_state)
+            compute_err=self.compute_err, callback=self.callback, random_state=self.random_state)
                      for run in range(self.n_run))
         entries = parallelizer(task_iter)
 

@@ -224,7 +224,7 @@ def dfmc(R, M, Theta, obj_types, obj_type2rank, max_iter=10,
 
     callback : callable, optional
         An optional user-supplied function to call after each iteration. Called
-        as callback(S, G), where S and G are current latent matrix factors.
+        as callback(G, S, cur_iter), where S and G are current latent estimates.
 
     random_state : int, RandomState instance or None, optional (default=None)
         If int, random_state is the seed used by the random number generator;
@@ -389,7 +389,7 @@ def dfmc(R, M, Theta, obj_types, obj_type2rank, max_iter=10,
                 err_system = (s, err_system[0])
 
         if callback:
-            callback(G, S)
+            callback(G, S, iter)
 
     if compute_err:
         logging.info("Violations of optimization objective: %d/%d " % (
@@ -453,11 +453,14 @@ if 0:
     R12[idxi, idxj] = 0
     R = {(0,1): [R12, R12b], (1,2): [R23]}
 
+    def cb(G, S, cur_iter):
+        print('Iteration: %d' % cur_iter)
+
     # Evaluate factorization (no mask)
     G, S = dfmc(R, M, Theta, obj_types, obj_type2rank,
                 max_iter=10, init_type="random_vcol", stopping=None,
                 stopping_system=None, verbose=0, compute_err=False,
-                callback=None, random_state=rnds, n_jobs=1)
+                callback=cb, random_state=rnds, n_jobs=1)
 
     Rij_app = np.dot(G[i,i], np.dot(S[i, j][0], G[j, j].T))
     X_pred = O[i,j][0][idxi, idxj] - Rij_app[idxi, idxj]

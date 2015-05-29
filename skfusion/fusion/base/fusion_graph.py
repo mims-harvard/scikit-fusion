@@ -194,7 +194,6 @@ class FusionGraph(object):
         for relation in relations:
             self.add_relation(relation)
 
-
     def remove_relation(self, relation):
         """Remove a single relation from the fusion graph.
 

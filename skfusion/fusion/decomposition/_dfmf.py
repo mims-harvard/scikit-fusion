@@ -166,7 +166,7 @@ def dfmf(R, Theta, obj_types, obj_type2rank,
 
     callback : callable, optional
         An optional user-supplied function to call after each iteration. Called
-        as callback(S, G), where S and G are current latent matrix factors.
+        as callback(G, S, cur_iter), where S and G are current latent estimates.
 
     random_state : int, RandomState instance or None, optional (default=None)
         If int, random_state is the seed used by the random number generator;
@@ -319,7 +319,7 @@ def dfmf(R, Theta, obj_types, obj_type2rank,
                 err_system = (s, err_system[0])
 
         if callback:
-            callback(G, S)
+            callback(G, S, iter)
 
     if compute_err:
         logging.info("Violations of optimization objective: %d/%d " % (
@@ -330,7 +330,7 @@ def dfmf(R, Theta, obj_types, obj_type2rank,
 def transform(R_ij, Theta_i, target_obj_type, obj_type2rank, G, S,
               max_iter=10, init_type="random_c",
               stopping=None, stopping_system=None, verbose=0,
-              compute_err=False, random_state=None):
+              compute_err=False, callback=None, random_state=None):
     verbose = 50 - verbose
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s",
                         datefmt="%m/%d/%Y %I:%M:%S %p", level=verbose)
@@ -448,6 +448,9 @@ def transform(R_ij, Theta_i, target_obj_type, obj_type2rank, G, S,
             obj.append(s)
             if stopping_system:
                 err_system = (s, err_system[0])
+
+        if callback:
+            callback(G_i, iter)
 
     if compute_err:
         logging.info("Violations of optimization objective: %d/%d " % (
