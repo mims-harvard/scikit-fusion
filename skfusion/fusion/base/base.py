@@ -49,7 +49,7 @@ class FusionBase(object):
             raise DataFusionError("Object type %s is not included "
                                   "in the fusion scheme" % object_type.name)
         if object_type not in self.factors_:
-            raise DataFusionError("Unknonw.")
+            raise DataFusionError("Unknown object type.")
         if self.n_run > 1 and run is None:
             return self._factor_iter(object_type)
         else:

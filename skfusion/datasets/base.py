@@ -104,7 +104,7 @@ def load_movielens(ratings=True, movie_genres=True, movie_actors=True):
         ratings_data = None
 
     if movie_genres:
-        movie_genres_data= {}
+        movie_genres_data = {}
         with gzip.open(join(module_path, 'movies.csv.gz'), 'rt', encoding='utf-8') as f:
             f.readline()
             lines = csv.reader(f)
