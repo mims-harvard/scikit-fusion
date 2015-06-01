@@ -292,6 +292,35 @@ class FusionGraph(object):
             raise DataFusionError("Object type name unknown")
         return self._name2object_type[name]
 
+    def get_names(self, object_type):
+        """Get names of all possible object type row/column names.
+
+        Parameters
+        ----------
+        object_type : ObjectType
+
+        Returns
+        -------
+        List of names when they exist, None otherwise.
+        """
+        if isinstance(object_type, str):
+            object_type = self.get_object_type(object_type)
+
+        size = 0
+        for rel in self.out_relations(object_type):
+            if rel.row_names:
+                return rel.row_names
+            else:
+                size = rel.data.shape[0]
+
+        for rel in self.in_relations(object_type):
+            if rel.col_names:
+                return rel.col_names
+            else:
+                size = rel.data.shape[1]
+
+        return [str(x) for x in range(size)]
+
     def out_relations(self, object_type):
         """Return an iterator for relations adjacent to the object type.
 
