@@ -54,6 +54,48 @@ class TestDfmf(unittest.TestCase):
         self.assertLess(np.sum(diff_G1 ** 2) / diff_G1.size, 1e-5)
         self.assertLess(np.sum(diff_hat ** 2) / diff_hat.size, 1e-5)
 
+    def test_preprocessors(self):
+        rnds = np.random.RandomState(0)
+        R12 = rnds.rand(50, 30)
+
+        t1 = ObjectType('type1', 50)
+        t2 = ObjectType('type2', 30)
+
+        def preprocessor(data):
+            return np.ones_like(data)
+
+        relation = Relation(R12, t1, t2, preprocessor=preprocessor)
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(relation)
+
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
+        self.assertEqual(fuser.backbone(relation).shape, (50, 30))
+        self.assertEqual(fuser.factor(t1).shape, (50, 50))
+        self.assertEqual(fuser.factor(t2).shape, (30, 30))
+        trnf = np.ones_like(relation.data)
+        np.testing.assert_almost_equal(fuser.complete(relation), trnf)
+
+    def test_postprocessors(self):
+        rnds = np.random.RandomState(0)
+        R12 = rnds.rand(50, 30)
+
+        t1 = ObjectType('type1', 50)
+        t2 = ObjectType('type2', 30)
+
+        def postprocessor(data):
+            return data - np.mean(data)
+
+        relation = Relation(R12, t1, t2, postprocessor=postprocessor)
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(relation)
+
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
+        self.assertEqual(fuser.backbone(relation).shape, (50, 30))
+        self.assertEqual(fuser.factor(t1).shape, (50, 50))
+        self.assertEqual(fuser.factor(t2).shape, (30, 30))
+        trnf = relation.data - np.mean(relation.data)
+        np.testing.assert_almost_equal(fuser.complete(relation), trnf)
+
 
 if __name__ == "__main__":
     unittest.main()

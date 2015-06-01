@@ -466,10 +466,15 @@ class Relation(object):
     name :
     row_names :
     col_names :
+    row_metadata :
+    col_metadata :
+    preprocessor :
+    postprocessor :
     """
     def __init__(self, data, row_type, col_type, name='',
                  row_names=None, col_names=None,
-                 row_metadata=None, col_metadata=None, **kwargs):
+                 row_metadata=None, col_metadata=None,
+                 preprocessor=None, postprocessor=None, **kwargs):
         self.__dict__.update(locals())
         self.__dict__.update(kwargs)
         self.__dict__.pop('kwargs', None)

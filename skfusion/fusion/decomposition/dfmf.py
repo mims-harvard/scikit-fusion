@@ -70,11 +70,13 @@ class Dfmf(FusionFit):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                if np.ma.is_masked(relation.data):
-                    relation.data.fill_value = self.fill_value
-                    data = relation.data.filled()
+                if relation.preprocessor:
+                    data = relation.preprocessor(relation.data)
                 else:
                     data = relation.data
+                if np.ma.is_masked(data):
+                    data.fill_value = self.fill_value
+                    data = data.filled()
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])
@@ -171,11 +173,13 @@ class DfmfTransform(FusionTransform):
         R, T = {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                if np.ma.is_masked(relation.data):
-                    relation.data.fill_value = self.fill_value
-                    data = relation.data.filled()
+                if relation.preprocessor:
+                    data = relation.preprocessor(relation.data)
                 else:
                     data = relation.data
+                if np.ma.is_masked(data):
+                    data.fill_value = self.fill_value
+                    data = data.filled()
                 X = R if relation.row_type != relation.col_type else T
                 X[relation.row_type, relation.col_type] = X.get((
                     relation.row_type, relation.col_type), [])

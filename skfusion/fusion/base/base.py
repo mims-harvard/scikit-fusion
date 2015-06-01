@@ -142,6 +142,8 @@ class FusionFit(FusionBase):
             S12 = self.backbone(relation, run)
             G2 = self.factor(relation.col_type, run)
             R12_hat = np.dot(G1, np.dot(S12, G2.T))
+            if relation.postprocessor:
+                R12_hat = relation.postprocessor(R12_hat)
             return R12_hat
 
     def _complete_iter(self, relation):
@@ -161,6 +163,8 @@ class FusionFit(FusionBase):
             S12 = self.backbone(relation, run)
             G2 = self.factor(relation.col_type, run)
             R12_hat = np.dot(G1, np.dot(S12, G2.T))
+            if relation.postprocessor:
+                R12_hat = relation.postprocessor(R12_hat)
             yield R12_hat
 
     def backbone(self, relation, run=None):

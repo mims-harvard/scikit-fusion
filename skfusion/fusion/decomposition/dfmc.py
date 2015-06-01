@@ -69,8 +69,12 @@ class Dfmc(FusionFit):
         R, T, M = {}, {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
-                data = relation.data.data if np.ma.is_masked(relation.data) else relation.data
-                mask = relation.data.mask if np.ma.is_masked(relation.data) else None
+                if relation.preprocessor:
+                    data = relation.preprocessor(relation.data)
+                else:
+                    data = relation.data
+                data = data.data if np.ma.is_masked(data) else data
+                mask = data.mask if np.ma.is_masked(data) else None
                 if relation.row_type != relation.col_type:
                     R[relation.row_type, relation.col_type] = R.get((
                         relation.row_type, relation.col_type), [])
