@@ -321,6 +321,34 @@ class FusionGraph(object):
 
         return [str(x) for x in range(size)]
 
+    def get_metadata(self, object_type):
+        """Get metadata for given object type.
+
+        Parameters
+        ----------
+        object_type : ObjectType
+
+        Returns
+        -------
+        Metadata (list of dicts)
+        """
+        if isinstance(object_type, str):
+            object_type = self.get_object_type(object_type)
+
+        metadata = [{} for x in self.get_names(object_type)]
+
+        for rel in self.out_relations(object_type):
+            if rel.row_metadata:
+                for md1, md2 in zip(metadata, rel.row_metadata):
+                    md1.update(md2)
+
+        for rel in self.in_relations(object_type):
+            if rel.col_metadata:
+                for md1, md2 in zip(metadata, rel.col_metadata):
+                    md1.update(md2)
+        return metadata
+
+
     def out_relations(self, object_type):
         """Return an iterator for relations adjacent to the object type.
 
@@ -440,7 +468,8 @@ class Relation(object):
     col_names :
     """
     def __init__(self, data, row_type, col_type, name='',
-                 row_names=None, col_names=None, **kwargs):
+                 row_names=None, col_names=None,
+                 row_metadata=None, col_metadata=None, **kwargs):
         self.__dict__.update(locals())
         self.__dict__.update(kwargs)
         self.__dict__.pop('kwargs', None)
