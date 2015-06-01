@@ -84,5 +84,58 @@ class TestFusionGraph(unittest.TestCase):
         self.assertEqual(fusion_graph.n_relations, 0)
         self.assertEqual(fusion_graph.n_object_types, 0)
 
+    def test_get_names_by_object_type(self):
+        rnds = np.random.RandomState(0)
+        X = rnds.rand(10, 10)
+        t1_names = list('ABCDEFGHIJ')
+        t2_names = list('KLMNOPQRST')
+
+        rel = Relation(X, name='Test',
+                       row_type=self.t1, row_names=t1_names,
+                       col_type=self.t2, col_names=t2_names)
+        rel2 = Relation(X, name='Test2',
+                        row_type=self.t2, row_names=t2_names,
+                        col_type=self.t3)
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(rel)
+        fusion_graph.add_relation(rel2)
+
+        self.assertEqual(fusion_graph.get_names(self.t1), t1_names)
+        self.assertEqual(fusion_graph.get_names(self.t2), t2_names)
+        t3_names = fusion_graph.get_names(self.t3)
+        self.assertEqual(len(t3_names), 10)
+
+    def test_get_object_type_metadata(self):
+        rnds = np.random.RandomState(0)
+        X = rnds.rand(10, 10)
+        a, b, c = list('ABCDEFGHIJ'), list('0123456789'), list('KLMNOPQRST')
+        t1_metadata = [{'a': x} for x in a]
+        t2_metadata = [{'b': x} for x in b]
+        t2_metadata2 = [{'d': x} for x in b]
+
+        rel = Relation(X, name='Test',
+                       row_type=self.t1, row_metadata=t1_metadata,
+                       col_type=self.t2, col_metadata=t2_metadata)
+        rel2 = Relation(X, name='Test2',
+                        row_type=self.t2, row_metadata=t2_metadata2,
+                        col_type=self.t3)
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(rel)
+        fusion_graph.add_relation(rel2)
+
+        def merge(d1, d2):
+            d = {}
+            d.update(d1)
+            d.update(d2)
+            return d
+
+        self.assertEqual(fusion_graph.get_metadata(self.t1), t1_metadata)
+        self.assertEqual(fusion_graph.get_metadata(self.t2), list(map(merge, t2_metadata, t2_metadata2)))
+        t3_metadata = fusion_graph.get_metadata(self.t3)
+        self.assertEqual(len(t3_metadata), 10)
+        for md in t3_metadata:
+            self.assertFalse(md)
+
+
 if __name__ == "__main__":
     unittest.main()
