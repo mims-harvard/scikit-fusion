@@ -22,6 +22,27 @@ class TestDfmf(unittest.TestCase):
         self.assertEqual(fuser.factor(t2).shape, (30, 30))
         np.testing.assert_almost_equal(fuser.complete(relation), relation.data)
 
+    def test_infinite(self):
+        rnds = np.random.RandomState(0)
+        R12 = rnds.rand(50, 30)
+        R13 = rnds.rand(50, 10)
+        R12 = np.ma.masked_greater(R12, 0.7)
+        R12[R12 < 0.1] = np.nan
+        R13[R13 < 0.5] = np.inf
+
+        t1 = ObjectType('type1', 50)
+        t2 = ObjectType('type2', 30)
+        t3 = ObjectType('type3', 10)
+        relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
+        fusion_graph = FusionGraph(relations)
+
+        fuser = Dfmf(init_type='random', random_state=rnds, fill_value=0).fuse(fusion_graph)
+        self.assertEqual(fuser.backbone(relations[0]).shape, (50, 30))
+        self.assertEqual(fuser.backbone(relations[1]).shape, (50, 10))
+        self.assertEqual(fuser.factor(t1).shape, (50, 50))
+        self.assertEqual(fuser.factor(t2).shape, (30, 30))
+        np.testing.assert_equal(np.sum(np.isfinite(fuser.complete(relations[0]))), R12.size)
+
     def test_transformation(self):
         R12 = np.random.rand(5, 3)
 

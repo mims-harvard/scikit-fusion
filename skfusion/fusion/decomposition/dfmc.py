@@ -26,6 +26,7 @@ class Dfmc(FusionFit):
     n_run :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     callback :
@@ -39,6 +40,7 @@ class Dfmc(FusionFit):
     n_run :
     stopping :
     stopping_system :
+    fill_value :
     verbose :
     compute_err :
     callback :
@@ -46,9 +48,9 @@ class Dfmc(FusionFit):
     n_jobs :
     """
     def __init__(self, max_iter=100, init_type='random_c', n_run=1,
-                 stopping=None, stopping_system=None, verbose=0,
-                 compute_err=False, callback=None, random_state=None,
-                 n_jobs=1):
+                 stopping=None, stopping_system=None, fill_value=0,
+                 verbose=0, compute_err=False, callback=None,
+                 random_state=None, n_jobs=1):
         super(Dfmc, self).__init__()
         self._set_params(vars())
 
@@ -74,6 +76,7 @@ class Dfmc(FusionFit):
                 else:
                     data = relation.data
                 data = data.data if np.ma.is_masked(data) else data
+                data[~np.isfinite(data)] = self.fill_value
                 mask = data.mask if np.ma.is_masked(data) else None
                 if relation.row_type != relation.col_type:
                     R[relation.row_type, relation.col_type] = R.get((
