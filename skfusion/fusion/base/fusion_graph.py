@@ -127,6 +127,7 @@ class FusionGraph(object):
             'fontname': 'sans-serif',
         }, **kwargs.pop('edge_attr', {}))
 
+        smallsize = .8 * float(G.node_attr['fontsize'])
         n_objects = {}
         for ot in self.object_types:
             # The maximum number of objects of this type featured in any of the
@@ -138,7 +139,8 @@ class FusionGraph(object):
                        # This is relied upon by biolab/orange3; if you change this id,
                        # please let them know:
                        id='node `%s`' % ot.name,
-                       label='<%s<br/><font color="grey">(%d)</font>>' % (ot.name, n))
+                       label=('<%s<br/><font point-size="%.1f" color="grey">'
+                               '%d</font>>' % (ot.name, smallsize, n)))
         relations = defaultdict(list)
         for rel in self.relations:
             relations[(rel.row_type, rel.col_type)].append(rel)
