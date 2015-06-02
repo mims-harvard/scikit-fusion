@@ -1,14 +1,13 @@
 """
-============================================
-Fusion of user ratings data and movie genres
-============================================
+=====================================================================
+Fusion of user ratings data, movie genres and data about movie actors
+=====================================================================
 
-This example demonstrates matrix completion on
-user-movie preference data.
+This example demonstrates matrix completion on user-movie preference
+data.
 
-DISCLAIMER: Results can be improved if ideas
-from collaborative filtering (regularization,
-user bias, item bias, etc.) are applied.
+DISCLAIMER: Results can be improved if ideas from collaborative
+filtering (regularization, user bias, item bias, etc.) are applied.
 """
 print(__doc__)
 
@@ -114,7 +113,7 @@ def main():
     score = rmse(R12_true[hidden], R12_pred[hidden])
     print('RMSE(mean movie): {}'.format(score))
 
-    # DFMF on ratings data only (it benefits if values are filled with mean)
+    # DFMF on ratings data only (it benefits if unknown values are set to mean)
     scores = []
     for _ in range(10):
         dfmf_fuser = skf.Dfmf(max_iter=100, fill_value=0,
@@ -128,7 +127,7 @@ def main():
         scores.append(rmse(R12_true[hidden], R12_pred[hidden]))
     print('RMSE(ratings; out-of-sample dfmf): {}'.format(np.mean(scores)))
 
-    # DFMF (it benefits if values are filled with mean)
+    # DFMF (it benefits if unknown values are set to mean)
     scores = []
     for _ in range(10):
         dfmf_fuser = skf.Dfmf(max_iter=100, fill_value=0,
@@ -142,7 +141,7 @@ def main():
         scores.append(rmse(R12_true[hidden], R12_pred[hidden]))
     print('RMSE(out-of-sample dfmf): {}'.format(np.mean(scores)))
 
-    # DFMC on ratings data only
+    # DFMC on ratings data only (proper treatment of unknown values)
     scores = []
     for _ in range(10):
         dfmc_fuser = skf.Dfmc(max_iter=100, init_type='random')
@@ -155,7 +154,7 @@ def main():
         scores.append(rmse(R12_true[hidden], R12_pred[hidden]))
     print('RMSE(ratings; out-of-sample dfmc): {}'.format(np.mean(scores)))
 
-    # DFMC
+    # DFMC (proper treatment of unknown values)
     scores = []
     for _ in range(10):
         dfmc_fuser = skf.Dfmc(max_iter=100, init_type='random')
@@ -172,7 +171,7 @@ def main():
     score = rmse(R12_true[~hidden], R12_pred[~hidden])
     print('RMSE(in-sample dfmc): {}'.format(score))
 
-    # PCA
+    # PCA (requires scikit-learn module)
     from sklearn.decomposition import RandomizedPCA
     model = RandomizedPCA(n_components=10)
     R12 = graph['User ratings'].data.filled()
@@ -181,7 +180,7 @@ def main():
     score = rmse(R12_true[hidden], R12_pred[hidden])
     print('RMSE(pca): {}'.format(score))
 
-    # NMF
+    # NMF (requires Nimfa module)
     import nimfa
     R12 = graph['User ratings'].data.filled()
     R12[R12 < 0] = 0
