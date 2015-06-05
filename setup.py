@@ -9,7 +9,7 @@ LONG_DESCRIPTION = open('README.rst').read()
 MAINTAINER = 'Marinka Zitnik'
 MAINTAINER_EMAIL = 'marinka.zitnik@fri.uni-lj.si'
 URL = 'http://xyz.biolab.si'
-LICENSE = 'GPL3'
+LICENSE = 'GPLv3'
 VERSION = '0.1'
 
 INSTALL_REQUIRES = (
@@ -31,7 +31,6 @@ def setup_package():
           classifiers=['Intended Audience :: Science/Research',
                        'Intended Audience :: Developers',
                        'License :: OSI Approved',
-                       'GNU General Public License v3 or later (GPLv3+)',
                        'Programming Language :: Python',
                        'Topic :: Software Development',
                        'Topic :: Scientific/Engineering',
