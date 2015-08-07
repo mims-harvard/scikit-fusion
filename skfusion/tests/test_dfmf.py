@@ -33,15 +33,17 @@ class TestDfmf(unittest.TestCase):
         t1 = ObjectType('type1', 50)
         t2 = ObjectType('type2', 30)
         t3 = ObjectType('type3', 10)
-        relations = [Relation(R12, t1, t2), Relation(R13, t1, t3)]
+        relations = [Relation(R12, t1, t2, fill_value='row_mean'),
+                     Relation(R13, t1, t3, fill_value='col_mean')]
         fusion_graph = FusionGraph(relations)
 
-        fuser = Dfmf(init_type='random', random_state=rnds, fill_value=0).fuse(fusion_graph)
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
         self.assertEqual(fuser.backbone(relations[0]).shape, (50, 30))
         self.assertEqual(fuser.backbone(relations[1]).shape, (50, 10))
         self.assertEqual(fuser.factor(t1).shape, (50, 50))
         self.assertEqual(fuser.factor(t2).shape, (30, 30))
-        np.testing.assert_equal(np.sum(np.isfinite(fuser.complete(relations[0]))), R12.size)
+        size = np.sum(np.isfinite(fuser.complete(relations[0])))
+        np.testing.assert_equal(size, R12.size)
 
     def test_transformation(self):
         R12 = np.random.rand(5, 3)

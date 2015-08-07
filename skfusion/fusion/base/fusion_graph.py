@@ -477,14 +477,13 @@ def fill_row(x):
     if np.ma.is_masked(x):
         # default fill_value in Numpy MaskedArray is 1e20.
         # mean gets masked if entire rows are unknown
-        row_mean.fill_value = 0
+        row_mean.fill_value = np.nanmean(x)
         row_mean = row_mean.filled()
-        indices = np.logical_or(~np.isfinite(x), x.mask)
+        indices = np.logical_or(~np.isfinite(x.data), x.mask)
     else:
         indices = ~np.isfinite(x)
-    filler = np.tile(row_mean[:, None], (1, x.shape[1]))
     filled = x.copy()
-    filled[indices] = filler[indices]
+    filled[indices] = np.take(row_mean, indices.nonzero()[0])
     return filled
 
 
@@ -493,14 +492,13 @@ def fill_col(x):
     if np.ma.is_masked(x):
         # default fill_value in Numpy MaskedArray is 1e20.
         # mean gets masked entire columns are unknown
-        col_mean.fill_value = 0
+        col_mean.fill_value = np.nanmean(x)
         col_mean = col_mean.filled()
-        indices = np.logical_or(~np.isfinite(x), x.mask)
+        indices = np.logical_or(~np.isfinite(x.data), x.mask)
     else:
         indices = ~np.isfinite(x)
-    filler = np.tile(col_mean[None, :], (x.shape[0], 1))
     filled = x.copy()
-    filled[indices] = filler[indices]
+    filled[indices] = np.take(col_mean, indices.nonzero()[1])
     return filled
 
 
