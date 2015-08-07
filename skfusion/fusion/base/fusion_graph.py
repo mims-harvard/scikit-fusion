@@ -1,5 +1,9 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from collections import defaultdict, OrderedDict, Iterable
 from uuid import uuid1 as uuid
+from numbers import Number
 
 import numpy as np
 
@@ -457,6 +461,66 @@ class ObjectType(object):
         return '{}("{}")'.format(self.__class__.__name__, self.name)
 
 
+def fill_mean(x):
+    mean = np.nanmean(x)
+    if np.ma.is_masked(x):
+        indices = np.logical_or(~np.isfinite(x), x.mask)
+    else:
+        indices = ~np.isfinite(x)
+    filled = x.copy()
+    filled[indices] = mean
+    return filled
+
+
+def fill_row(x):
+    row_mean = np.nanmean(x, 1)
+    if np.ma.is_masked(x):
+        # default fill_value in Numpy MaskedArray is 1e20.
+        # mean gets masked if entire rows are unknown
+        row_mean.fill_value = 0
+        row_mean = row_mean.filled()
+        indices = np.logical_or(~np.isfinite(x), x.mask)
+    else:
+        indices = ~np.isfinite(x)
+    filler = np.tile(row_mean[:, None], (1, x.shape[1]))
+    filled = x.copy()
+    filled[indices] = filler[indices]
+    return filled
+
+
+def fill_col(x):
+    col_mean = np.nanmean(x, 0)
+    if np.ma.is_masked(x):
+        # default fill_value in Numpy MaskedArray is 1e20.
+        # mean gets masked entire columns are unknown
+        col_mean.fill_value = 0
+        col_mean = col_mean.filled()
+        indices = np.logical_or(~np.isfinite(x), x.mask)
+    else:
+        indices = ~np.isfinite(x)
+    filler = np.tile(col_mean[None, :], (x.shape[0], 1))
+    filled = x.copy()
+    filled[indices] = filler[indices]
+    return filled
+
+
+def fill_const(x, const):
+    filled = x.copy()
+    filled[~np.isfinite(x)] = const
+    if np.ma.is_masked(x):
+        filled.data[x.mask] = const
+    return filled
+
+
+FILL_CONST = 'const'
+FILL_TYPE = dict([
+    ('mean', fill_mean),
+    ('row_mean', fill_row),
+    ('col_mean', fill_col),
+    ('const', fill_const)
+])
+
+
 class Relation(object):
     """Relation used for data fusion.
 
@@ -468,13 +532,14 @@ class Relation(object):
     name :
     row_names :
     col_names :
+    fill_value : 'mean', 'row_mean', 'col_mean' or float
     row_metadata :
     col_metadata :
     preprocessor :
     postprocessor :
     """
     def __init__(self, data, row_type, col_type, name='',
-                 row_names=None, col_names=None,
+                 row_names=None, col_names=None, fill_value='mean',
                  row_metadata=None, col_metadata=None,
                  preprocessor=None, postprocessor=None, **kwargs):
         self.__dict__.update(locals())
@@ -482,6 +547,13 @@ class Relation(object):
         self.__dict__.pop('kwargs', None)
         self.__dict__.pop('self', None)
         self._id = name or uuid()
+
+    def filled(self):
+        if isinstance(self.fill_value, Number):
+            filled_data = FILL_TYPE[FILL_CONST](self.data, self.fill_value)
+        else:
+            filled_data = FILL_TYPE[self.fill_value](self.data)
+        return filled_data
 
     def __contains__(self, obj_type):
         return obj_type == self.row_type or obj_type == self.col_type

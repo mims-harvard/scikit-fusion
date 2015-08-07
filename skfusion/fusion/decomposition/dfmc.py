@@ -26,7 +26,6 @@ class Dfmc(FusionFit):
     n_run :
     stopping :
     stopping_system :
-    fill_value :
     verbose :
     compute_err :
     callback :
@@ -40,7 +39,6 @@ class Dfmc(FusionFit):
     n_run :
     stopping :
     stopping_system :
-    fill_value :
     verbose :
     compute_err :
     callback :
@@ -48,8 +46,8 @@ class Dfmc(FusionFit):
     n_jobs :
     """
     def __init__(self, max_iter=100, init_type='random_c', n_run=1,
-                 stopping=None, stopping_system=None, fill_value=0,
-                 verbose=0, compute_err=False, callback=None,
+                 stopping=None, stopping_system=None, verbose=0,
+                 compute_err=False, callback=None,
                  random_state=None, n_jobs=1):
         super(Dfmc, self).__init__()
         self._set_params(vars())
@@ -71,13 +69,17 @@ class Dfmc(FusionFit):
         R, T, M = {}, {}, {}
         for row_type, col_type in product(self.fusion_graph.object_types, repeat=2):
             for relation in self.fusion_graph.get_relations(row_type, col_type):
+                filled_data = relation.filled()
                 if relation.preprocessor:
-                    data = relation.preprocessor(relation.data)
+                    preprocessed_data = relation.preprocessor(filled_data)
                 else:
-                    data = relation.data
-                data = data.data if np.ma.is_masked(data) else data
-                data[~np.isfinite(data)] = self.fill_value
-                mask = data.mask if np.ma.is_masked(data) else None
+                    preprocessed_data = filled_data
+                if np.ma.is_masked(preprocessed_data):
+                    data = preprocessed_data.data
+                    mask = preprocessed_data.mask
+                else:
+                    data = preprocessed_data
+                    mask = None
                 if relation.row_type != relation.col_type:
                     R[relation.row_type, relation.col_type] = R.get((
                         relation.row_type, relation.col_type), [])
