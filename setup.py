@@ -13,7 +13,7 @@ MAINTAINER = 'Marinka Zitnik'
 MAINTAINER_EMAIL = 'marinka.zitnik@fri.uni-lj.si'
 URL = 'http://github.com/marinkaz/scikit-fusion'
 LICENSE = 'GPLv3'
-VERSION = '0.2'
+VERSION = '0.2.1'
 ISRELEASED = False
 
 INSTALL_REQUIRES = (
