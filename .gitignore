@@ -8,8 +8,6 @@
 *.swo
 .DS_Store
 build
-sklearn/datasets/__config__.py
-sklearn/**/*.html
 
 dist/
 MANIFEST
@@ -19,7 +17,7 @@ doc/modules/generated/
 doc/datasets/generated/
 *.pdf
 pip-log.txt
-scikit_learn.egg-info/
+skfusion/version.py
 
 *.nt.bz2
 *.tar.gz
