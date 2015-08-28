@@ -116,8 +116,7 @@ def main():
     # DFMF on ratings data only (it benefits if unknown values are set to mean)
     scores = []
     for _ in range(10):
-        dfmf_fuser = skf.Dfmf(max_iter=100, fill_value=0,
-                                 init_type='random')
+        dfmf_fuser = skf.Dfmf(max_iter=100, init_type='random')
         dfmf_mod = dfmf_fuser.fuse(graph_small)
         R12_pred = dfmf_mod.complete(graph_small['User ratings'])
         # R12_pred = scale(R12_pred, 0, 1)
@@ -130,8 +129,7 @@ def main():
     # DFMF (it benefits if unknown values are set to mean)
     scores = []
     for _ in range(10):
-        dfmf_fuser = skf.Dfmf(max_iter=100, fill_value=0,
-                                 init_type='random')
+        dfmf_fuser = skf.Dfmf(max_iter=100, init_type='random')
         dfmf_mod = dfmf_fuser.fuse(graph)
         R12_pred = dfmf_mod.complete(graph['User ratings'])
         # R12_pred = scale(R12_pred, 0, 1)
@@ -139,7 +137,7 @@ def main():
         R12_pred += np.tile(mean_movie.reshape((1, n_movies)), (n_users, 1))
         R12_pred = scale(R12_pred, 0, 1)
         scores.append(rmse(R12_true[hidden], R12_pred[hidden]))
-    print('RMSE(out-of-sample dfmf): {}'.format(np.mean(scores)))
+    print('RMSE(ratings; out-of-sample dfmf): {}'.format(np.mean(scores)))
 
     # DFMC on ratings data only (proper treatment of unknown values)
     scores = []
@@ -165,7 +163,7 @@ def main():
         R12_pred += np.tile(mean_movie.reshape((1, n_movies)), (n_users, 1))
         R12_pred = scale(R12_pred, 0, 1)
         scores.append(rmse(R12_true[hidden], R12_pred[hidden]))
-    print('RMSE(out-of-sample dfmc): {}'.format(np.mean(scores)))
+    print('RMSE(ratings; out-of-sample dfmc): {}'.format(np.mean(scores)))
 
     # in-sample error (should be very close to zero for large rank values)
     score = rmse(R12_true[~hidden], R12_pred[~hidden])
