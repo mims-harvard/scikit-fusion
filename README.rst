@@ -110,6 +110,7 @@ Relevant links
 
 ****
 
+- Gene prioritization by compressive data fusion and chaining: http://dx.doi.org/10.1371/journal.pcbi.1004552
 - Data fusion by matrix factorization: http://dx.doi.org/10.1109/TPAMI.2014.2343973
 - Discovering disease-disease associations by fusing systems-level molecular data: http://www.nature.com/srep/2013/131115/srep03202/full/srep03202.html
 - Matrix factorization-based data fusion for gene function prediction in baker's yeast and slime mold: http://www.worldscientific.com/doi/pdf/10.1142/9789814583220_0038
