@@ -30,7 +30,6 @@ class FusionBase(object):
         self._params = values
         # first argument is 'self'
         del self._params['self']
-        del self._params['__class__']
         self.__dict__.update(self._params)
 
     def factor(self, object_type, run=None):
