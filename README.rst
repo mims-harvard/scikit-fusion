@@ -12,6 +12,8 @@ scikit-fusion
 *scikit-fusion* is a Python module for data fusion based on recent collective latent
 factor models.
 
+[News!]: Check out also https://github.com/acopar/fast-fusion for fast CPU and GPU-accelerated implementatons of some of our methods. 
+
 Dependencies
 ============
 
