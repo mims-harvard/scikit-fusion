@@ -8,7 +8,7 @@ scikit-fusion
 
 [**[News:]**](https://github.com/acopar/fast-fusion) Fast CPU and GPU-accelerated implementatons of some of our methods.
 
-[**[News:]**](https://github.com/marinkaz/nimfa) Python module implementing many algorithms for nonnegative matrix factorization.
+[**[News:]**](https://github.com/marinkaz/nimfa) Nimfa, Python module implementing many algorithms for nonnegative matrix factorization.
 
 <p align="center">
 <img src="https://github.com/marinkaz/scikit-fusion/blob/master/fusion.png" width="800" align="center">
@@ -101,7 +101,7 @@ scikit-fusion contains several applications of data fusion:
      Relation(ObjectType(Gene), ObjectType(Gene)),
      Relation(ObjectType(Gene), ObjectType(Experimental condition))}
 
-Relevant publications (Methods)
+Selected publications (Methods)
 ------------------------------
 
 - Data fusion by matrix factorization: http://dx.doi.org/10.1109/TPAMI.2014.2343973
@@ -110,7 +110,7 @@ Relevant publications (Methods)
 - Gene network inference by fusing data from diverse distributions: https://academic.oup.com/bioinformatics/article/31/12/i230/216398
 - Fast optimization of non-negative matrix tri-factorization: https://doi.org/10.1371/journal.pone.0217994
 
-Relevant publications (Applications)
+Selected publications (Applications)
 ------------------------------------
 
 - A comprehensive structural, biochemical and biological profiling of the human NUDIX hydrolase family: https://www.nature.com/articles/s41467-017-01642-w
@@ -120,3 +120,8 @@ Relevant publications (Applications)
 - Matrix factorization-based data fusion for drug-induced liver injury prediction: http://www.tandfonline.com/doi/abs/10.4161/sysb.29072
 - Collective pairwise classification for multi-way analysis of disease and drug data: https://doi.org/10.1142/9789814749411_0008
 
+Tutorials
+---------
+
+- Large-scale data fusion by collective matrix factorization, Basel Computational Biology Conference, [BC]^2 [[Slides]](http://helikoid.si/bc215/bc2-slides.pdf) [[Handouts]](http://helikoid.si/bc215/bc2-handouts.pdf)
+- Data fusion of everything, 37th Annual International Conference of the IEEE Engineering in Medicine and Biology Society, EMBC [[Slides]](http://helikoid.si/embc15/embc-slides.pdf) [[Handouts]](http://helikoid.si/embc15/embc-handouts.pdf)
