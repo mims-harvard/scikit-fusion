@@ -9,6 +9,10 @@ scikit-fusion
 
 [**[News:]**](https://github.com/marinkaz/nimfa) Python module implementing many algorithms for nonnegative matrix factorization.
 
+<p align="center">
+<img src="https://github.com/marinkaz/scikit-fusion/blob/master/fusion.png" width="800" align="center">
+</p>
+
 Dependencies
 ------------
 
