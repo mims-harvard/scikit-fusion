@@ -2,6 +2,7 @@ scikit-fusion
 -------------
 
 [![build: passing](https://img.shields.io/travis/marinkaz/scikit-fusion.svg)](https://travis-ci.org/marinkaz/scikit-fusion)
+[![BSD license](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 *scikit-fusion* is a Python module for data fusion and learning over heterogeneous datasets. The core of scikit-fusion are recent collective latent factor models and large-scale joint matrix factorization algorithms. 
 
@@ -25,30 +26,30 @@ Install
 -------
 
 This package uses distutils, which is the default way of installing
-python modules. To install in your home directory, use::
+python modules. To install in your home directory, use:
 
     python setup.py install --user
 
-To install for all users on Unix/Linux::
+To install for all users on Unix/Linux:
 
     python setup.py build
     sudo python setup.py install
 
-For development mode use::
+For development mode use:
 
     python setup.py develop
 
 Use
 ---
 
-Let's generate three random data matrices describing three different object types::
+Let's generate three random data matrices describing three different object types:
 
      >>> import numpy as np
      >>> R12 = np.random.rand(50, 100)
      >>> R13 = np.random.rand(50, 40)
      >>> R23 = np.random.rand(100, 40)
 
-Next, we define our data fusion graph::
+Next, we define our data fusion graph:
 
      >>> from skfusion import fusion
      >>> t1 = fusion.ObjectType('Type 1', 10)
@@ -60,26 +61,25 @@ Next, we define our data fusion graph::
      >>> fusion_graph = fusion.FusionGraph()
      >>> fusion_graph.add_relations_from(relations)
 
-and then collectively infer the latent data model::
+and then collectively infer the latent data model:
 
      >>> fuser = fusion.Dfmf()
      >>> fuser.fuse(fusion_graph)
      >>> print(fuser.factor(t1).shape)
      (50, 10)
 
-
-Afterwards new data might arrive::
+Afterwards new data might arrive:
 
      >>> new_R12 = np.random.rand(10, 100)
      >>> new_R13 = np.random.rand(10, 40)
 
-for which we define the fusion graph::
+for which we define the fusion graph:
 
      >>> new_relations = [fusion.Relation(new_R12, t1, t2),
                           fusion.Relation(new_R13, t1, t3)]
      >>> new_graph = fusion.FusionGraph(new_relations)
 
-and transform new objects to the latent space induced by the ``fuser``::
+and transform new objects to the latent space induced by the ``fuser``:
 
      >>> transformer = fusion.DfmfTransform()
      >>> transformer.transform(t1, new_graph, fuser)
@@ -88,7 +88,7 @@ and transform new objects to the latent space induced by the ``fuser``::
 
 ****
 
-scikit-fusion is distributed with a few working data fusion scenarios::
+scikit-fusion contains several applications of data fusion:
 
     >>> from skfusion import datasets
     >>> dicty = datasets.load_dicty()
