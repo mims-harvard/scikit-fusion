@@ -8,9 +8,9 @@ import imp
 
 DISTNAME = 'scikit-fusion'
 DESCRIPTION = 'A Python module for data fusion built on top of factorized models.'
-LONG_DESCRIPTION = open('README.rst').read()
+LONG_DESCRIPTION = open('README.md').read()
 MAINTAINER = 'Marinka Zitnik'
-MAINTAINER_EMAIL = 'marinka.zitnik@fri.uni-lj.si'
+MAINTAINER_EMAIL = 'marinka@cs.stanford.edu'
 URL = 'http://github.com/marinkaz/scikit-fusion'
 LICENSE = 'GPLv3'
 VERSION = '0.2.1'
