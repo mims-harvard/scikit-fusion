@@ -6,9 +6,11 @@ scikit-fusion
 
 *scikit-fusion* is a Python module for data fusion and learning over heterogeneous datasets. The core of scikit-fusion are recent collective latent factor models and large-scale joint matrix factorization algorithms. 
 
-[**[News:]**](https://github.com/acopar/fast-fusion) Fast CPU and GPU-accelerated implementatons of some of our methods.
+[**[News:]**](https://github.com/acopar/fast-fusion) [Fast CPU and GPU-accelerated implementatons](https://github.com/acopar/fast-fusion) of some of our methods.
 
-[**[News:]**](https://github.com/marinkaz/nimfa) Nimfa, Python module implementing many algorithms for nonnegative matrix factorization.
+[**[News:]**](https://github.com/marinkaz/scikit-fusion) [Scikit-fusion](https://github.com/marinkaz/scikit-fusion), collective latent factor models, matrix factorization for data fusion and learning over hetnets.
+
+[**[News:]**](https://github.com/mims-harvard/fastGNMF) [fastGNMF](https://github.com/mims-harvard/fastGNMF), fast implementation of graph-regularized non-negative matrix factorization using [Facebook FAISS](https://github.com/facebookresearch/faiss).
 
 <p align="center">
 <img src="https://github.com/marinkaz/scikit-fusion/blob/master/fusion.png" width="800" align="center">
