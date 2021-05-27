@@ -119,6 +119,19 @@ class TestDfmf(unittest.TestCase):
         trnf = relation.data - np.mean(relation.data)
         np.testing.assert_almost_equal(fuser.complete(relation), trnf)
 
+    def test_reproducibility(self):
+        rnds = np.random.RandomState(0)
+        R12 = rnds.rand(5, 3)
+
+        t1 = ObjectType('type1', 3)
+        t2 = ObjectType('type2', 2)
+        relation = Relation(R12, t1, t2)
+        fusion_graph = FusionGraph()
+        fusion_graph.add_relation(relation)
+
+        fuser = Dfmf(init_type='random', random_state=rnds).fuse(fusion_graph)
+        np.testing.assert_almost_equal(fuser.complete(relation).sum(), 9.02321)
+
 
 if __name__ == "__main__":
     unittest.main()
