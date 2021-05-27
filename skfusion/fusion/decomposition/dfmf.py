@@ -63,7 +63,6 @@ class Dfmf(FusionFit):
         if not isinstance(self.random_state, np.random.RandomState):
             self.random_state = np.random.RandomState(self.random_state)
 
-        object_types = set([ot for ot in self.fusion_graph.object_types])
         object_type2rank = {ot: int(ot.rank) for ot in self.fusion_graph.object_types}
 
         R, T = {}, {}
@@ -86,9 +85,9 @@ class Dfmf(FusionFit):
 
         parallelizer = Parallel(n_jobs=self.n_jobs, max_nbytes=1e3, verbose=self.verbose)
         task_iter = (delayed(parallel_dfmf_wrapper)(
-            R=R, Theta=T, obj_types=object_types, obj_type2rank=object_type2rank,
-            max_iter=self.max_iter, init_type=self.init_type, stopping=self.stopping,
-            stopping_system=self.stopping_system, verbose=self.verbose,
+            R=R, Theta=T, obj_types=self.fusion_graph.object_types,
+            obj_type2rank=object_type2rank, max_iter=self.max_iter, init_type=self.init_type,
+            stopping=self.stopping, stopping_system=self.stopping_system, verbose=self.verbose,
             compute_err=self.compute_err, callback=self.callback, random_state=self.random_state,
             n_jobs=self.n_jobs)
                      for _ in range(self.n_run))
