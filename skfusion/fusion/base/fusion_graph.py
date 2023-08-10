@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict, OrderedDict, Iterable
+from collections import defaultdict, OrderedDict
+from collections.abc import Iterable
 from uuid import uuid1 as uuid
 from numbers import Number
 
